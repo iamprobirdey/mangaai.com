@@ -21,6 +21,16 @@ export async function startSubscription(plan: "monthly" | "annual"): Promise<Che
   const price = (await visitorPricing())[plan];
   const planId = price.planId;
 
+  // Checkouts closed before paying leave a "created" subscription behind; cancel those so they
+  // don't pile up in Razorpay or get mistaken for the current one.
+  const admin = createAdminClient();
+  const { data: stale } = await admin.from("subscriptions").select("id,razorpay_subscription_id").eq("parent_id", profile.id).eq("status", "created");
+  for (const old of stale ?? []) {
+    await razorpay().subscriptions.cancel(old.razorpay_subscription_id).catch(() => null);
+    const now = new Date().toISOString();
+    await admin.from("subscriptions").update({ status: "cancelled", cancelled_at: now, updated_at: now }).eq("id", old.id);
+  }
+
   try {
     const sub = await razorpay().subscriptions.create({
       plan_id: planId,
@@ -29,7 +39,7 @@ export async function startSubscription(plan: "monthly" | "annual"): Promise<Che
       ...(startAt ? { start_at: startAt } : {}),
       notes: { parent_id: profile.id, plan },
     });
-    await createAdminClient().from("subscriptions").insert({
+    await admin.from("subscriptions").insert({
       parent_id: profile.id,
       razorpay_subscription_id: sub.id,
       razorpay_plan_id: planId,

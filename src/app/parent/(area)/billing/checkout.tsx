@@ -27,6 +27,9 @@ export function Checkout({ monthly, annual, trial }: { monthly: string; annual: 
       if ("error" in result) return setMessage({ error: result.error });
       if (!window.Razorpay) return setMessage({ error: "Checkout didn't load. Check your connection and try again." });
 
+      // Razorpay lets the parent retry inside the same window after a failed card, so a failure is only
+      // reported if they close the window without a successful payment.
+      let failed = false;
       const rzp = new window.Razorpay({
         key: result.keyId,
         subscription_id: result.subscriptionId,
@@ -35,6 +38,8 @@ export function Checkout({ monthly, annual, trial }: { monthly: string; annual: 
         prefill: { email: result.email },
         theme: { color: "#1c1f4a" },
         handler: async (response: RazorpayResponse) => {
+          failed = false;
+          setMessage({ ok: "Confirming…" });
           const res = await fetch("/api/billing/verify", {
             method: "POST",
             headers: { "content-type": "application/json" },
@@ -48,9 +53,18 @@ export function Checkout({ monthly, annual, trial }: { monthly: string; annual: 
             setMessage({ error: "Payment went through but we couldn't confirm it yet. Refresh in a minute." });
           }
         },
-        modal: { ondismiss: () => setMessage({ error: "Checkout closed before finishing. Nothing was charged." }) },
+        modal: {
+          ondismiss: () =>
+            setMessage({
+              error: failed
+                ? "The payment didn't go through. Try another card or UPI app."
+                : "Checkout closed before finishing. Nothing was charged.",
+            }),
+        },
       });
-      rzp.on("payment.failed", () => setMessage({ error: "The payment didn't go through. Try another card or UPI app." }));
+      rzp.on("payment.failed", () => {
+        failed = true;
+      });
       rzp.open();
     });
   }
