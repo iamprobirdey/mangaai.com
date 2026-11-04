@@ -12,12 +12,23 @@ export function Logo({ href = "/" }: { href?: string }) {
   );
 }
 
-export function Cover({ src, title, className = "" }: { src: string | null; title: string; className?: string }) {
+export function Cover({
+  src,
+  title,
+  className = "",
+  alt = "",
+}: {
+  src: string | null;
+  title: string;
+  className?: string;
+  /** Leave empty when the title is shown next to the cover; set it on pages where the cover stands alone. */
+  alt?: string;
+}) {
   return (
     <div className={`relative aspect-[3/4] overflow-hidden rounded-lg border-[3px] border-ink bg-tone-deep screentone ${className}`}>
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
+        <img src={src} alt={alt} className="h-full w-full object-cover" loading="lazy" />
       ) : (
         <span className="absolute inset-0 grid place-items-center p-3 text-center font-display text-sm">{title}</span>
       )}

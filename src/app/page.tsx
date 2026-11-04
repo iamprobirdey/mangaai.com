@@ -1,9 +1,14 @@
 import Link from "next/link";
-import { Cover, Logo } from "@/components/ui";
+import { Cover } from "@/components/ui";
+import { JsonLd } from "@/components/json-ld";
+import { PublicFooter, PublicHeader } from "@/components/public-chrome";
+import { siteUrl } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";
 import { coverUrl } from "@/lib/storage";
 import { visitorPricing, type RegionPricing } from "@/lib/pricing";
 import { AGE_BAND_LABELS, type AgeBand } from "@/lib/constants";
+
+export const metadata = { alternates: { canonical: "/" } };
 
 type ShowcaseSeries = { slug: string; title: string; cover_path: string | null; age_band: AgeBand };
 
@@ -44,17 +49,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
-        <Logo />
-        <nav className="flex items-center gap-2">
-          <Link href="/login" className="btn btn-quiet">
-            Sign in
-          </Link>
-          <Link href="/signup" className="btn btn-primary">
-            Start free trial
-          </Link>
-        </nav>
-      </header>
+      <PublicHeader />
 
       <main className="flex-1">
         {/* Hero: a manga page. Headline in a speech bubble, series in tilted panels. */}
@@ -129,9 +124,11 @@ export default async function Home() {
             <ul className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-4">
               {series.map((s) => (
                 <li key={s.slug}>
-                  <Cover src={coverUrl(s.cover_path)} title={s.title} />
-                  <p className="mt-2 font-bold">{s.title}</p>
-                  <p className="hint">{AGE_BAND_LABELS[s.age_band]}</p>
+                  <Link href={`/manga/${s.slug}`} className="block">
+                    <Cover src={coverUrl(s.cover_path)} title={s.title} />
+                    <p className="mt-2 font-bold">{s.title}</p>
+                    <p className="hint">{AGE_BAND_LABELS[s.age_band]}</p>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -169,15 +166,25 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className="border-t-[3px] border-ink bg-paper">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-6 text-sm sm:px-6">
-          <span>© {new Date().getFullYear()} MangaAI. Stories are created with AI and reviewed by people before publishing.</span>
-          <nav className="flex gap-4">
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/terms">Terms</Link>
-          </nav>
-        </div>
-      </footer>
+      <PublicFooter />
+      <JsonLd
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "MangaAI",
+            url: siteUrl(),
+            logo: `${siteUrl()}/icons/icon-512.png`,
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "MangaAI",
+            url: siteUrl(),
+            description: "Safe, ad-free manga for kids with new chapters every week.",
+          },
+        ]}
+      />
     </div>
   );
 }

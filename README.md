@@ -70,6 +70,23 @@ range, that the series isn't hidden for them, and that the family has a subscrip
 - Saved chapters are cleared on sign-out, on account deletion, and when a different reader is picked on the same device.
 - Page images come in two sizes, 800px for phones and 1400px for larger screens, and the browser picks the right one.
 
+**SEO**
+- Public, indexable pages:
+  - a page for each series at `/manga/<slug>`, with a sample of free pages
+  - an age hub at `/manga-for-kids` and four age pages
+  - parent guides at `/guides`
+- A dynamic `sitemap.xml`, plus a `robots.txt` that blocks every private area and lets AI assistants read public pages.
+- `llms.txt`, a generated share image, canonical URLs, structured data (Organization, WebSite, ComicSeries, BreadcrumbList, ItemList, Article), and cover alt text.
+- Private pages are marked no-index. Vercel preview deployments, and anything not marked as production, are kept out of search entirely (`SITE_INDEXABLE`).
+- `www` and the bare domain redirect to the address in `NEXT_PUBLIC_SITE_URL`. Security headers are set on every response.
+
+**Google Analytics (GA4), set up for a children's service** (`NEXT_PUBLIC_GA_ID`)
+- Loads only on parent-facing pages: home, sign-up and sign-in, guides, legal pages and the grown-ups area. It never loads on `/profiles`, `/read/*`, series and age pages, or `/admin`.
+- Loads only after the visitor accepts the consent banner. Google Signals and ad personalisation are off, and ad storage is always denied.
+- Navigating to a page where it isn't allowed switches it off with Google's opt-out flag. Query strings are dropped.
+- Events: `sign_up`, `begin_checkout`, `trial_started` and `subscription_started`. "Cookie settings" in the footer lets visitors change their choice.
+- In GA, keep Google Signals off and don't link Google Ads. Under **Admin → Data streams → Enhanced measurement**, turn off "Page changes based on browser history events" (the app sends its own page views).
+
 ## Setup
 
 ### 1. Supabase

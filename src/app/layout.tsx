@@ -4,10 +4,19 @@ import "@fontsource/atkinson-hyperlegible/latin-400.css";
 import "@fontsource/atkinson-hyperlegible/latin-700.css";
 import "./globals.css";
 import { ServiceWorker } from "@/components/service-worker";
+import { Analytics } from "@/components/analytics";
+import { isIndexable, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: { default: "MangaAI — manga for kids", template: "%s · MangaAI" },
-  description: "Safe, ad-free manga for kids, with new chapters every week. Parents pay, kids read.",
+  metadataBase: new URL(siteUrl()),
+  title: { default: "MangaAI — safe manga for kids, new chapters every week", template: "%s · MangaAI" },
+  description:
+    "Age-right manga for kids aged 4 to 13+, with new chapters every week. No ads, no chat. Parents pay and stay in charge with a PIN, reading limits and a weekly email.",
+  applicationName: "MangaAI",
+  openGraph: { type: "website", siteName: "MangaAI", locale: "en_IN", url: "/" },
+  twitter: { card: "summary_large_image" },
+  robots: isIndexable() ? { index: true, follow: true } : { index: false, follow: false },
+  formatDetection: { telephone: false },
   appleWebApp: { capable: true, title: "MangaAI", statusBarStyle: "default" },
   icons: { apple: "/icons/apple-touch-icon.png" },
 };
@@ -20,6 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         {children}
         <ServiceWorker />
+        <Analytics />
       </body>
     </html>
   );

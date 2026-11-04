@@ -1,6 +1,6 @@
 import { Logo, PageShell } from "@/components/ui";
 
-export const metadata = { title: "Privacy" };
+export const metadata = { title: "Privacy policy", alternates: { canonical: "/privacy" } };
 
 // DRAFT — have a lawyer review before launch (COPPA, India DPDP Act, GDPR if you serve the EU/UK).
 export default function PrivacyPage() {
@@ -26,6 +26,18 @@ export default function PrivacyPage() {
         <p>
           To run the service, show reading progress, apply the limits you set, and send the weekly summary you can turn off. We do
           not sell data, show ads, or use children&apos;s data for advertising or profiling.
+        </p>
+        <h2 className="text-xl" id="analytics">Analytics and cookies</h2>
+        <p>
+          Sign-in uses essential cookies only. If you agree in the cookie banner, we use Google Analytics on pages for grown-ups
+          (the home page, sign-up and sign-in, guides, legal pages and the grown-ups area) to understand how families find and
+          use MangaAI. Google Analytics is never loaded on children&apos;s reading screens or reader profiles, and we turn off
+          Google Signals and advertising features. Page addresses are recorded without query strings. You can change your choice
+          any time with &quot;Cookie settings&quot; at the bottom of public pages.
+        </p>
+        <p>
+          What children read (chapters, pages, reading time) is measured by MangaAI itself to run the service, show progress and
+          send parents the weekly summary. It is never shared with analytics or advertising companies.
         </p>
         <h2 className="text-xl">Your controls</h2>
         <p>

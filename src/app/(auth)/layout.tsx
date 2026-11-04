@@ -1,5 +1,7 @@
 import { Logo } from "@/components/ui";
 
+export const metadata = { robots: { index: false, follow: false } };
+
 export default function AuthLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="screentone flex flex-1 flex-col items-center px-4 py-10">

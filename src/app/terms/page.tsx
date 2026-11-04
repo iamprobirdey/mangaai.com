@@ -1,6 +1,6 @@
 import { Logo, PageShell } from "@/components/ui";
 
-export const metadata = { title: "Terms" };
+export const metadata = { title: "Terms of service", alternates: { canonical: "/terms" } };
 
 // DRAFT — have a lawyer review before launch.
 export default function TermsPage() {

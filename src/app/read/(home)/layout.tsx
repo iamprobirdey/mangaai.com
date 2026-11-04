@@ -4,6 +4,8 @@ import { requireChild } from "@/lib/dal";
 import { childSummary } from "@/lib/reading";
 import { avatarEmoji } from "@/lib/constants";
 
+export const metadata = { robots: { index: false, follow: false } };
+
 export default async function KidLayout({ children }: LayoutProps<"/read">) {
   const child = await requireChild();
   const summary = await childSummary(child);

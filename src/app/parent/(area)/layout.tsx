@@ -10,6 +10,8 @@ const NAV = [
   ["/parent/settings", "Settings"],
 ] as const;
 
+export const metadata = { robots: { index: false, follow: false } };
+
 export default async function ParentLayout({ children }: LayoutProps<"/parent">) {
   await requireParentUnlocked();
   return (

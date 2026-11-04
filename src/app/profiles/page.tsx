@@ -6,7 +6,7 @@ import { avatarEmoji } from "@/lib/constants";
 import { selectChild } from "@/app/parent/actions";
 import { ReaderButton } from "./reader-button";
 
-export const metadata = { title: "Who's reading?" };
+export const metadata = { title: "Who's reading?", robots: { index: false, follow: false } };
 
 export default async function ProfilesPage() {
   const [profile, children] = await Promise.all([getProfile(), getChildren()]);

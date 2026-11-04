@@ -3,6 +3,7 @@ import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { cancelSubscription, startSubscription } from "../../billing-actions";
+import { track } from "@/components/analytics";
 
 type RazorpayResponse = { razorpay_payment_id: string; razorpay_subscription_id: string; razorpay_signature: string };
 type RazorpayInstance = { open: () => void; on: (event: string, cb: (e: unknown) => void) => void };
@@ -20,6 +21,7 @@ export function Checkout({ monthly, annual, trial }: { monthly: string; annual: 
 
   function pay() {
     setMessage({});
+    track("begin_checkout", { plan });
     startTransition(async () => {
       const result = await startSubscription(plan);
       if ("error" in result) return setMessage({ error: result.error });
@@ -39,6 +41,7 @@ export function Checkout({ monthly, annual, trial }: { monthly: string; annual: 
             body: JSON.stringify(response),
           });
           if (res.ok) {
+            track(result.trial ? "trial_started" : "subscription_started", { plan });
             setMessage({ ok: result.trial ? "Your free trial has started. Happy reading!" : "You're subscribed. Happy reading!" });
             router.refresh();
           } else {

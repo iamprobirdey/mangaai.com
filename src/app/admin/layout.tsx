@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/ui";
 import { requireAdmin, requireParentUnlocked } from "@/lib/dal";
 
-export const metadata = { title: { default: "Content studio", template: "%s · Studio" } };
+export const metadata = { title: { default: "Content studio", template: "%s · Studio" }, robots: { index: false, follow: false } };
 
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   await requireAdmin();

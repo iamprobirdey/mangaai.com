@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { track } from "@/components/analytics";
 import { FormMessage, SubmitButton } from "@/components/forms";
 import { requestPasswordReset, signIn, signUp, updatePassword } from "./actions";
 
@@ -29,6 +30,9 @@ export function SignInForm({ next }: { next?: string }) {
 
 export function SignUpForm() {
   const [state, action] = useActionState(signUp, undefined);
+  useEffect(() => {
+    if (state?.ok) track("sign_up", { method: "email" });
+  }, [state?.ok]);
   if (state?.ok) return <FormMessage state={state} />;
   return (
     <form action={action} className="space-y-4">

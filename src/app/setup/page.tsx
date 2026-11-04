@@ -3,7 +3,7 @@ import { Logo } from "@/components/ui";
 import { getChildren, getProfile } from "@/lib/dal";
 import { SetupForm } from "./setup-form";
 
-export const metadata = { title: "Set up your family" };
+export const metadata = { title: "Set up your family", robots: { index: false, follow: false } };
 
 export default async function SetupPage() {
   const [profile, children] = await Promise.all([getProfile(), getChildren()]);

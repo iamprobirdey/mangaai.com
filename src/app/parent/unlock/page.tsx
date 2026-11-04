@@ -3,7 +3,7 @@ import { Logo } from "@/components/ui";
 import { getProfile, isParentUnlocked } from "@/lib/dal";
 import { UnlockForm } from "./unlock-form";
 
-export const metadata = { title: "Grown-ups only" };
+export const metadata = { title: "Grown-ups only", robots: { index: false, follow: false } };
 
 export default async function UnlockPage({ searchParams }: PageProps<"/parent/unlock">) {
   const { next } = await searchParams;
