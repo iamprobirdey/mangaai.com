@@ -22,6 +22,15 @@ export default async function ReadersPage() {
         <p className="mt-1">Up to 5 reader profiles. Each one only sees stories for their age range.</p>
       </div>
 
+      {children.length < 5 ? (
+        <section id="add" className="panel-flat scroll-mt-24 p-5">
+          <h2 className="text-xl">Add a reader</h2>
+          <AddReaderForm />
+        </section>
+      ) : (
+        <p className="hint">You have 5 readers, the most a family can have. Delete one to add another.</p>
+      )}
+
       {children.map((c) => {
         const allowed = ((series ?? []) as Pick<Series, "id" | "title" | "age_band">[]).filter((s) =>
           bandsUpTo(c.age_band).includes(s.age_band),
@@ -41,12 +50,6 @@ export default async function ReadersPage() {
         );
       })}
 
-      {children.length < 5 ? (
-        <section className="panel-flat p-5">
-          <h2 className="text-xl">Add a reader</h2>
-          <AddReaderForm />
-        </section>
-      ) : null}
     </div>
   );
 }

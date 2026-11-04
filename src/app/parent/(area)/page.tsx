@@ -9,6 +9,8 @@ import { Notice } from "@/components/ui";
 
 export const metadata = { title: "Grown-ups" };
 
+const MAX_READERS = 5;
+
 export default async function ParentOverview() {
   const [profile, children] = await Promise.all([getProfile(), getChildren()]);
   const access = await getAccess(profile.id);
@@ -16,9 +18,14 @@ export default async function ParentOverview() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl">Hi{profile.display_name ? `, ${profile.display_name}` : ""}</h1>
-        <p className="mt-1">Here&apos;s what your readers did in the last 7 days.</p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl">Hi{profile.display_name ? `, ${profile.display_name}` : ""}</h1>
+          <p className="mt-1">Here&apos;s what your readers did in the last 7 days.</p>
+        </div>
+        {children.length < MAX_READERS ? (
+          <Link href="/parent/readers#add" className="btn btn-primary">+ Add a reader</Link>
+        ) : null}
       </div>
 
       {access.state === "none" ? (
@@ -91,6 +98,18 @@ export default async function ParentOverview() {
             </li>
           );
         })}
+        {children.length < MAX_READERS ? (
+          <li>
+            <Link
+              href="/parent/readers#add"
+              className="panel-flat flex h-full min-h-40 flex-col items-center justify-center gap-2 border-dashed p-5 text-center hover:bg-tone"
+            >
+              <span className="grid h-14 w-14 place-items-center rounded-full border-[3px] border-ink bg-paper font-display text-3xl" aria-hidden>+</span>
+              <span className="font-display text-lg">Add a reader</span>
+              <span className="hint">{MAX_READERS - children.length} of {MAX_READERS} profiles left</span>
+            </Link>
+          </li>
+        ) : null}
       </ul>
       <p className="hint">
         A summary like this arrives by email every Sunday. You can turn it off in <Link className="underline" href="/parent/settings">Settings</Link>.

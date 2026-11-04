@@ -14,7 +14,7 @@ type LiveChapter = Pick<Chapter, "id" | "series_id" | "number" | "title" | "cove
 type ProgressRow = { chapter_id: string; series_id: string; last_page: number; completed_at: string | null; updated_at: string };
 
 export default async function KidHome({ searchParams }: PageProps<"/read">) {
-  const { q } = await searchParams;
+  const { q, genre: genreParam } = await searchParams;
   const query = typeof q === "string" ? q.trim().toLowerCase() : "";
   const child = await requireChild();
   const supabase = await createClient();
@@ -58,6 +58,9 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
     .slice(0, 8);
   const shelf = (shelfRows ?? []).map((r) => byId.get(r.series_id)).filter(Boolean) as Series[];
   const left = timeLeftSeconds(child, summary.secondsToday);
+  // Genre filter for "All stories": only genres that at least one visible series has.
+  const genres = GENRES.filter((g) => series.some((s) => s.genres.includes(g)));
+  const genre = typeof genreParam === "string" && (genres as readonly string[]).includes(genreParam) ? genreParam : null;
   const results = query ? series.filter((s) => s.title.toLowerCase().includes(query) || s.genres.some((g) => g.toLowerCase().includes(query))) : null;
 
   return (
@@ -132,15 +135,45 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
 
           <Shelf title="My shelf" items={shelf} empty="Tap “Add to my shelf” on a story you like and it shows up here." />
 
-          {GENRES.map((g) => {
-            const items = series.filter((s) => s.genres.includes(g));
-            return items.length ? <Shelf key={g} title={g} items={items} /> : null;
-          })}
-          {series.length === 0 ? <p>New stories are on their way. Check back soon!</p> : null}
-          <Shelf title="All stories" items={series} />
+          {series.length === 0 ? <p>New stories are on their way. Check back soon!</p> : (
+            <section id="all" className="scroll-mt-6">
+              <h2 className="text-2xl">All stories</h2>
+              {genres.length ? (
+                <nav aria-label="Filter by genre" className="mt-3 flex flex-wrap gap-2">
+                  <Link href="/read#all" className={`tag ${genre ? "" : "bg-ink text-paper"}`} aria-current={genre ? undefined : "true"}>All</Link>
+                  {genres.map((g) => (
+                    <Link
+                      key={g}
+                      href={`/read?genre=${encodeURIComponent(g)}#all`}
+                      className={`tag ${genre === g ? "bg-ink text-paper" : ""}`}
+                      aria-current={genre === g ? "true" : undefined}
+                    >
+                      {g}
+                    </Link>
+                  ))}
+                </nav>
+              ) : null}
+              <StoryGrid items={genre ? series.filter((s) => s.genres.includes(genre)) : series} />
+            </section>
+          )}
         </>
       )}
     </div>
+  );
+}
+
+function StoryGrid({ items }: { items: Series[] }) {
+  return (
+    <ul className="mt-4 grid grid-cols-2 gap-5 sm:grid-cols-4 lg:grid-cols-6">
+      {items.map((s) => (
+        <li key={s.id}>
+          <Link href={`/read/series/${s.slug}`} className="block">
+            <Cover src={coverUrl(s.cover_path)} title={s.title} />
+            <p className="mt-2 font-bold leading-tight">{s.title}</p>
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -149,20 +182,7 @@ function Shelf({ title, items, empty }: { title: string; items: Series[]; empty?
   return (
     <section>
       <h2 className="text-2xl">{title}</h2>
-      {items.length ? (
-        <ul className="mt-4 grid grid-cols-2 gap-5 sm:grid-cols-4 lg:grid-cols-6">
-          {items.map((s) => (
-            <li key={s.id}>
-              <Link href={`/read/series/${s.slug}`} className="block">
-                <Cover src={coverUrl(s.cover_path)} title={s.title} />
-                <p className="mt-2 font-bold leading-tight">{s.title}</p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="hint mt-2">{empty}</p>
-      )}
+      {items.length ? <StoryGrid items={items} /> : <p className="hint mt-2">{empty}</p>}
     </section>
   );
 }
