@@ -58,12 +58,27 @@ export function childCanSee(child: Child, series: Series, hidden: Set<string>) {
   return series.status === "published" && bandsUpTo(child.age_band).includes(series.age_band) && !hidden.has(series.id);
 }
 
+/**
+ * Kids only ever see approved chapters whose release time has passed. RLS enforces this for
+ * parents, but admins can read every chapter, so reader screens filter explicitly too
+ * (status = approved, publish_at <= now) and readableChapter re-checks here.
+ */
+/** ISO timestamp for "released by now" filters. */
+export function liveCutoff() {
+  return new Date().toISOString();
+}
+
+export function chapterIsLive(c: Pick<Chapter, "status" | "publish_at">) {
+  return c.status === "approved" && !!c.publish_at && Date.parse(c.publish_at) <= Date.now();
+}
+
 /** A live chapter plus its series, or null if the child may not open it. */
 export async function readableChapter(child: Child, chapterId: string) {
   const supabase = await createClient();
   const { data } = await supabase.from("chapters").select("*, series(*)").eq("id", chapterId).maybeSingle();
   if (!data || !data.series) return null;
   const { series, ...chapter } = data as Chapter & { series: Series };
+  if (!chapterIsLive(chapter)) return null;
   if (!childCanSee(child, series, await hiddenSeriesIds(child.id))) return null;
   return { chapter: chapter as Chapter, series };
 }

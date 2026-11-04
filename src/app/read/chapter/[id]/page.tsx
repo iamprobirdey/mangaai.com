@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAccess, requireChild } from "@/lib/dal";
-import { chapterLabel, readableChapter } from "@/lib/content";
+import { chapterLabel, liveCutoff, readableChapter } from "@/lib/content";
 import { childSummary, timeLeftSeconds } from "@/lib/reading";
 import { avatarEmoji } from "@/lib/constants";
 import { Reader } from "./reader";
@@ -69,7 +69,7 @@ export default async function ChapterPage({ params }: PageProps<"/read/chapter/[
   const [{ data: pageRows }, { data: progress }, { data: nextChapter }] = await Promise.all([
     admin.from("pages").select("page_number,image_path,width,height,image_path_sm,width_sm").eq("chapter_id", chapter.id).order("page_number"),
     supabase.from("reading_progress").select("last_page,completed_at").eq("child_id", child.id).eq("chapter_id", chapter.id).maybeSingle(),
-    supabase.from("chapters").select("id,number,title").eq("series_id", series.id).gt("number", chapter.number).order("number").limit(1).maybeSingle(),
+    supabase.from("chapters").select("id,number,title").eq("series_id", series.id).gt("number", chapter.number).eq("status", "approved").lte("publish_at", liveCutoff()).order("number").limit(1).maybeSingle(),
   ]);
   const rows = pageRows ?? [];
   if (rows.length === 0) notFound();

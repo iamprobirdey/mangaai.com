@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Cover } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { getAccess, requireChild } from "@/lib/dal";
-import { chapterLabel, childCanSee, hiddenSeriesIds, type Chapter, type Series, type Volume } from "@/lib/content";
+import { chapterLabel, childCanSee, hiddenSeriesIds, liveCutoff, type Chapter, type Series, type Volume } from "@/lib/content";
 import { coverUrl } from "@/lib/storage";
 import { AGE_BAND_LABELS, DAYS } from "@/lib/constants";
 import { toggleShelf } from "../../../actions";
@@ -18,7 +18,7 @@ export default async function SeriesPage({ params }: PageProps<"/read/series/[sl
 
   const [{ data: volumes }, { data: chapters }, { data: progress }, { data: shelf }, access] = await Promise.all([
     supabase.from("volumes").select("*").eq("series_id", series.id).order("number"),
-    supabase.from("chapters").select("*").eq("series_id", series.id).order("number"),
+    supabase.from("chapters").select("*").eq("series_id", series.id).eq("status", "approved").lte("publish_at", liveCutoff()).order("number"),
     supabase.from("reading_progress").select("chapter_id,last_page,completed_at").eq("child_id", child.id).eq("series_id", series.id),
     supabase.from("shelf").select("series_id").eq("child_id", child.id).eq("series_id", series.id).maybeSingle(),
     getAccess(child.parent_id),

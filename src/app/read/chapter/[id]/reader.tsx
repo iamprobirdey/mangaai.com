@@ -93,22 +93,52 @@ export function Reader(props: Props) {
     return () => clearTimeout(t);
   }, [index, total, chapterId]);
 
-  // Reading-time heartbeat (only while the page is visible) and the daily limit.
+  // Reading-time heartbeat: counts visible seconds, reports every 30s, and flushes the
+  // remainder when the reader closes so short visits still count toward the daily limit.
   useEffect(() => {
-    const id = setInterval(async () => {
-      if (document.visibilityState !== "visible") return;
+    let pending = 0;
+    let last = Date.now();
+    const tick = () => {
+      const now = Date.now();
+      if (document.visibilityState === "visible") pending += (now - last) / 1000;
+      last = now;
+    };
+    const take = () => {
+      tick();
+      const whole = Math.min(120, Math.floor(pending));
+      pending -= whole;
+      return whole;
+    };
+    const send = async () => {
+      const seconds = take();
+      if (seconds < 1) return;
       try {
         const res = await fetch("/api/heartbeat", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ chapterId, seconds: HEARTBEAT_SECONDS }),
+          body: JSON.stringify({ chapterId, seconds }),
         });
         if (res.ok && ((await res.json()) as { locked: boolean }).locked) setLocked(true);
       } catch {
-        /* offline: try again next tick */
+        pending += seconds; // offline: try again next tick
       }
-    }, HEARTBEAT_SECONDS * 1000);
-    return () => clearInterval(id);
+    };
+    const flush = () => {
+      const seconds = take();
+      if (seconds < 1) return;
+      const blob = new Blob([JSON.stringify({ chapterId, seconds })], { type: "application/json" });
+      if (!navigator.sendBeacon?.("/api/heartbeat", blob)) pending += seconds;
+    };
+    const onVisibility = () => (document.visibilityState === "hidden" ? flush() : tick());
+    const id = setInterval(send, HEARTBEAT_SECONDS * 1000);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", flush);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", flush);
+      flush();
+    };
   }, [chapterId]);
 
   useEffect(() => {

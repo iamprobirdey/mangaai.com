@@ -20,7 +20,7 @@ export default async function KidLayout({ children }: LayoutProps<"/read">) {
               <span aria-hidden>🔥</span> {summary.streak} {summary.streak === 1 ? "day" : "days"}
             </Link>
             <Link href="/read/badges" className="tag gap-1 px-3 py-1 text-base">
-              <span aria-hidden>🏅</span> {summary.badges.length} badges
+              <span aria-hidden>🏅</span> {summary.badges.length} {summary.badges.length === 1 ? "badge" : "badges"}
             </Link>
             <Link href="/profiles" className="flex items-center gap-2 rounded-full border-[3px] border-ink bg-sun py-1 pl-1 pr-3 font-bold" title="Switch reader">
               <span className="grid h-8 w-8 place-items-center rounded-full bg-paper text-xl" aria-hidden>

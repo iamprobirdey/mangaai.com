@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Cover } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { getAccess, requireChild } from "@/lib/dal";
-import { chapterLabel, seriesForChild, type Chapter, type Series } from "@/lib/content";
+import { chapterLabel, liveCutoff, seriesForChild, type Chapter, type Series } from "@/lib/content";
 import { coverUrl } from "@/lib/storage";
 import { childSummary, timeLeftSeconds } from "@/lib/reading";
 import { GENRES } from "@/lib/constants";
@@ -24,7 +24,7 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
 
   const [{ data: chapterRows }, { data: progressRows }, { data: shelfRows }] = await Promise.all([
     seriesIds.length
-      ? supabase.from("chapters").select("id,series_id,number,title,publish_at,is_free_preview,page_count").in("series_id", seriesIds).order("number")
+      ? supabase.from("chapters").select("id,series_id,number,title,publish_at,is_free_preview,page_count").in("series_id", seriesIds).eq("status", "approved").lte("publish_at", liveCutoff()).order("number")
       : Promise.resolve({ data: [] }),
     supabase.from("reading_progress").select("chapter_id,series_id,last_page,completed_at,updated_at").eq("child_id", child.id).order("updated_at", { ascending: false }).limit(50),
     supabase.from("shelf").select("series_id").eq("child_id", child.id).order("created_at", { ascending: false }),
