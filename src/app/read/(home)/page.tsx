@@ -38,7 +38,7 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
 
   // Continue reading: one card per recently read series — the unfinished volume, or the next one.
   const seen = new Set<string>();
-  const continueCards: { series: Series; chapter: LiveChapter; page: number }[] = [];
+  const continueCards: { series: Series; chapter: LiveChapter; page: number; next: boolean }[] = [];
   for (const p of progress) {
     if (seen.has(p.series_id) || !byId.has(p.series_id)) continue;
     seen.add(p.series_id);
@@ -46,10 +46,10 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
     const current = inSeries.find((c) => c.id === p.chapter_id);
     if (!current) continue;
     if (!p.completed_at) {
-      continueCards.push({ series: byId.get(p.series_id)!, chapter: current, page: p.last_page });
+      continueCards.push({ series: byId.get(p.series_id)!, chapter: current, page: p.last_page, next: false });
     } else {
       const next = inSeries.find((c) => Number(c.number) > Number(current.number) && !progressByChapter.get(c.id)?.completed_at);
-      if (next) continueCards.push({ series: byId.get(p.series_id)!, chapter: next, page: 1 });
+      if (next) continueCards.push({ series: byId.get(p.series_id)!, chapter: next, page: 1, next: true });
     }
     if (continueCards.length >= 4) break;
   }
@@ -99,7 +99,7 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
             <section>
               <h2 className="text-2xl">Continue reading</h2>
               <ul className="mt-4 grid gap-4 sm:grid-cols-2">
-                {continueCards.map(({ series: s, chapter, page }) => (
+                {continueCards.map(({ series: s, chapter, page, next }) => (
                   <li key={s.id}>
                     <Link href={`/read/volume/${chapter.id}`} className="panel flex gap-4 p-3 hover:-translate-y-0.5">
                       <Cover src={coverUrl(chapter.cover_path ?? s.cover_path)} title={s.title} className="w-20 shrink-0" />
@@ -107,7 +107,7 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
                         <span className="font-display">{s.title}</span>
                         <span>{volumeLabel(chapter)}</span>
                         <span className="hint">
-                          {page > 1 ? `Page ${page} of ${chapter.page_count}` : "Start the next volume"}
+                          {next ? "Start the next volume" : `Page ${page} of ${chapter.page_count}`}
                         </span>
                       </div>
                     </Link>
