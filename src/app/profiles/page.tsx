@@ -5,6 +5,7 @@ import { getChildren, getProfile } from "@/lib/dal";
 import { avatarEmoji } from "@/lib/constants";
 import { selectChild } from "@/app/parent/actions";
 import { ReaderButton } from "./reader-button";
+import { SignOutButton } from "@/components/service-worker";
 
 export const metadata = { title: "Who's reading?", robots: { index: false, follow: false } };
 
@@ -40,6 +41,9 @@ export default async function ProfilesPage() {
           {profile.role === "admin" ? (
             <Link href="/admin" className="btn">Content studio</Link>
           ) : null}
+        </div>
+        <div className="mt-6 flex justify-center">
+          <SignOutButton className="btn btn-quiet text-sm" />
         </div>
       </main>
     </div>

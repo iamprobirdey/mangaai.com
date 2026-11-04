@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { Logo } from "@/components/ui";
 import { getProfile, isParentUnlocked } from "@/lib/dal";
-import { UnlockForm } from "./unlock-form";
+import { UnlockFooter, UnlockForm } from "./unlock-form";
 
 export const metadata = { title: "Grown-ups only", robots: { index: false, follow: false } };
 
@@ -20,6 +20,7 @@ export default async function UnlockPage({ searchParams }: PageProps<"/parent/un
         <h1 className="mt-2 text-2xl">Grown-ups only</h1>
         <p className="mt-1">Enter your 4-digit PIN.</p>
         <UnlockForm next={target} />
+        <UnlockFooter />
       </main>
     </div>
   );

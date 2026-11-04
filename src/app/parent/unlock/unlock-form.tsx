@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { FormMessage, SubmitButton } from "@/components/forms";
 import { unlock } from "../actions";
+import { SignOutButton } from "@/components/service-worker";
 
 export function UnlockForm({ next }: { next: string }) {
   const [state, action] = useActionState(unlock, undefined);
@@ -24,7 +25,15 @@ export function UnlockForm({ next }: { next: string }) {
       <FormMessage state={state} />
       <SubmitButton className="btn btn-primary w-full" pending="Checking…">Unlock</SubmitButton>
       <Link href="/profiles" className="btn btn-quiet w-full">Back to readers</Link>
-      <p className="hint">Forgot it? Sign out, use “Forgot password”, then set a new PIN in Settings.</p>
     </form>
+  );
+}
+
+export function UnlockFooter() {
+  return (
+    <div className="mt-4 space-y-2 text-center">
+      <p className="hint">Forgot it? Sign out, use “Forgot password”, then set a new PIN in Settings.</p>
+      <div className="flex justify-center"><SignOutButton className="btn btn-quiet text-sm" /></div>
+    </div>
   );
 }
