@@ -10,7 +10,7 @@ const now = new Date("2026-11-04T10:00:00Z");
 const sub = (over: Partial<SubscriptionRow>): SubscriptionRow => ({
   id: "s", parent_id: "p", razorpay_subscription_id: "sub_1", plan: "monthly", status: "active",
   trial_end: null, current_start: null, current_end: null, first_charged_at: null,
-  cancel_at_cycle_end: false, cancelled_at: null, short_url: null, created_at: now.toISOString(), ...over,
+  cancel_at_cycle_end: false, cancelled_at: null, short_url: null, amount: null, currency: null, created_at: now.toISOString(), ...over,
 });
 const iso = (offsetDays: number) => new Date(now.getTime() + offsetDays * day).toISOString();
 

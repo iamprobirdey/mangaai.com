@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Cover, Logo } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { coverUrl } from "@/lib/storage";
-import { publicEnv } from "@/lib/env";
+import { visitorPricing, type RegionPricing } from "@/lib/pricing";
 import { AGE_BAND_LABELS, type AgeBand } from "@/lib/constants";
 
 type ShowcaseSeries = { slug: string; title: string; cover_path: string | null; age_band: AgeBand };
@@ -28,8 +28,18 @@ const PLACEHOLDER_PANELS = [
   { title: "The Tiny Dragon Bakery", art: "🐲🍞" },
 ];
 
+async function getPricing(): Promise<RegionPricing | null> {
+  try {
+    return await visitorPricing();
+  } catch {
+    return null; // plans not configured yet
+  }
+}
+
 export default async function Home() {
-  const series = await getShowcase();
+  const [series, pricing] = await Promise.all([getShowcase(), getPricing()]);
+  const monthly = pricing?.monthly.label;
+  const annual = pricing?.annual.label;
   const panels = series.slice(0, 3);
 
   return (
@@ -61,7 +71,7 @@ export default async function Home() {
               <Link href="/signup" className="btn btn-primary text-lg">
                 Try 7 days free
               </Link>
-              <span className="hint">Then {publicEnv.priceMonthly}/month or {publicEnv.priceAnnual}/year. Cancel anytime.</span>
+              {pricing ? <span className="hint">Then {monthly}/month or {annual}/year. Cancel anytime.</span> : null}
             </div>
           </div>
 
@@ -143,11 +153,11 @@ export default async function Home() {
             <p className="mt-2">Up to 5 reader profiles. Every series, every chapter.</p>
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <div className="panel-flat p-4">
-                <div className="font-display text-3xl">{publicEnv.priceMonthly}</div>
+                <div className="font-display text-3xl">{monthly ?? "—"}</div>
                 <div className="hint">per month</div>
               </div>
               <div className="panel-flat border-leaf p-4">
-                <div className="font-display text-3xl">{publicEnv.priceAnnual}</div>
+                <div className="font-display text-3xl">{annual ?? "—"}</div>
                 <div className="hint">per year, the best value</div>
               </div>
             </div>

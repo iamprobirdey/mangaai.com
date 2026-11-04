@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { serverEnv } from "@/lib/env";
+import { formatMoney } from "@/lib/pricing";
 import { addDays, localDate, requestTime } from "@/lib/dates";
 import { Stat } from "@/components/ui";
 
@@ -7,8 +8,14 @@ export const metadata = { title: "Analytics" };
 
 const pct = (n: number, d: number) => (d > 0 ? `${Math.round((n / d) * 100)}%` : "—");
 
-function money(minor: number, currency: string) {
-  return new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: 0 }).format(minor / 100);
+/** Recurring revenue per month, by currency (yearly plans count as 1/12). Never adds rupees to dollars. */
+function mrrByCurrency(rows: { plan: string; amount: number | null; currency: string | null }[]) {
+  const out = new Map<string, number>();
+  for (const r of rows) {
+    if (!r.amount || !r.currency) continue;
+    out.set(r.currency, (out.get(r.currency) ?? 0) + (r.plan === "annual" ? r.amount / 12 : r.amount));
+  }
+  return [...out.entries()].map(([currency, minor]) => formatMoney(Math.round(minor), currency));
 }
 
 export default async function AdminAnalytics() {
@@ -19,7 +26,7 @@ export default async function AdminAnalytics() {
 
   const [{ data: subs }, { count: families }, { count: readers }, { data: activeDays }, { data: digests }, { data: chapterStats }, { data: topSeries }] =
     await Promise.all([
-      admin.from("subscriptions").select("plan,status,trial_end,first_charged_at,cancelled_at,updated_at,current_end").neq("status", "created"),
+      admin.from("subscriptions").select("plan,status,trial_end,first_charged_at,cancelled_at,updated_at,current_end,amount,currency").neq("status", "created"),
       admin.from("profiles").select("id", { count: "exact", head: true }).eq("role", "parent"),
       admin.from("children").select("id", { count: "exact", head: true }),
       admin.from("reading_days").select("child_id").gte("day", addDays(today, -6)),
@@ -31,8 +38,7 @@ export default async function AdminAnalytics() {
   const all = subs ?? [];
   const paying = all.filter((s) => ["active", "pending"].includes(s.status) || (s.status === "cancelled" && s.current_end && Date.parse(s.current_end) > now));
   const trialing = all.filter((s) => s.status === "authenticated" && s.trial_end && Date.parse(s.trial_end) > now);
-  const amounts = serverEnv.planAmounts();
-  const mrr = paying.reduce((sum, s) => sum + (s.plan === "annual" ? amounts.annual / 12 : amounts.monthly), 0);
+  const mrr = mrrByCurrency(paying);
 
   // Trial conversion: of trials that have ended, how many were charged at least once.
   const endedTrials = all.filter((s) => s.trial_end && Date.parse(s.trial_end) <= now);
@@ -50,7 +56,11 @@ export default async function AdminAnalytics() {
       <section>
         <h2 className="text-xl">Revenue</h2>
         <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Stat label="Monthly recurring revenue" value={money(mrr, amounts.currency)} note="Annual plans counted as 1/12 per month" />
+          <Stat
+            label="Monthly recurring revenue"
+            value={mrr.length ? mrr.join(" + ") : "—"}
+            note="Yearly plans counted as 1/12 per month, shown per currency"
+          />
           <Stat label="Paying families" value={paying.length} note={`${paying.filter((s) => s.plan === "annual").length} on the yearly plan`} />
           <Stat label="In free trial" value={trialing.length} />
           <Stat label="Failed payments in grace" value={all.filter((s) => s.status === "pending" || s.status === "halted").length} />

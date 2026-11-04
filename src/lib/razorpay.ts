@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import Razorpay from "razorpay";
 import { serverEnv } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { priceForPlanId } from "@/lib/pricing";
 
 let client: Razorpay | null = null;
 export function razorpay() {
@@ -45,7 +46,7 @@ export type RazorpaySubscriptionEntity = {
 const toIso = (s?: number | null) => (s ? new Date(s * 1000).toISOString() : null);
 
 export function planFromId(planId: string): "monthly" | "annual" {
-  return planId === serverEnv.plans().annual ? "annual" : "monthly";
+  return priceForPlanId(planId)?.interval ?? "monthly";
 }
 
 /**
@@ -57,7 +58,7 @@ export async function syncSubscription(entity: RazorpaySubscriptionEntity, extra
   const notes = (entity.notes && !Array.isArray(entity.notes) ? entity.notes : {}) as Record<string, string>;
   const { data: existing } = await admin
     .from("subscriptions")
-    .select("id,parent_id,first_charged_at,trial_end")
+    .select("id,parent_id,first_charged_at,trial_end,amount")
     .eq("razorpay_subscription_id", entity.id)
     .maybeSingle();
 
@@ -77,6 +78,10 @@ export async function syncSubscription(entity: RazorpaySubscriptionEntity, extra
       existing?.first_charged_at ?? (extra.charged || (entity.paid_count ?? 0) > 0 ? new Date().toISOString() : null),
     cancelled_at: entity.status === "cancelled" ? (toIso(entity.ended_at) ?? new Date().toISOString()) : null,
     updated_at: new Date().toISOString(),
+    // Price is recorded when the subscription is created; only fill it in if missing.
+    ...(!existing?.amount && priceForPlanId(entity.plan_id)
+      ? { amount: priceForPlanId(entity.plan_id)!.amount, currency: priceForPlanId(entity.plan_id)!.currency }
+      : {}),
   };
 
   const { data } = await admin

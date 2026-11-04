@@ -11,6 +11,8 @@ export type SubscriptionRow = {
   cancel_at_cycle_end: boolean;
   cancelled_at: string | null;
   short_url: string | null;
+  amount: number | null;
+  currency: string | null;
   created_at: string;
 };
 

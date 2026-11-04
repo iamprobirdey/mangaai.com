@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { publicEnv, serverEnv } from "@/lib/env";
+import { serverEnv } from "@/lib/env";
+import { formatMoney, pricingFor } from "@/lib/pricing";
 import { sendEmail, trialEndingEmail } from "@/lib/email";
 
 const REMIND_DAYS_BEFORE = 2;
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
 
   const { data: trials } = await admin
     .from("subscriptions")
-    .select("id,parent_id,plan,trial_end")
+    .select("id,parent_id,plan,trial_end,amount,currency")
     .eq("status", "authenticated")
     .gt("trial_end", now.toISOString())
     .lte("trial_end", horizon.toISOString());
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
     const message = trialEndingEmail(profile?.display_name ?? null, {
       chargeDate,
       plan: t.plan === "annual" ? "yearly" : "monthly",
-      price: t.plan === "annual" ? `${publicEnv.priceAnnual} per year` : `${publicEnv.priceMonthly} per month`,
+      price: `${t.amount && t.currency ? formatMoney(t.amount, t.currency) : pricingFor("IN")[t.plan === "annual" ? "annual" : "monthly"].label} per ${t.plan === "annual" ? "year" : "month"}`,
     });
     try {
       const r = await sendEmail(email, message.subject, message.html, message.text);

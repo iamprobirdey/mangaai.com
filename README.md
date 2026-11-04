@@ -92,12 +92,17 @@ The migrations create the tables, row-level security (helpers live in a non-expo
 2. Under **Webhooks**, add `https://YOUR-DOMAIN/api/email/webhook` with the `email.delivered` and `email.opened` events. Put the signing secret in `RESEND_WEBHOOK_SECRET`.
 
 ### 3. Razorpay
-1. Under **Subscriptions → Plans**, create a monthly plan and a yearly plan. Put their IDs in `RAZORPAY_PLAN_MONTHLY` and `RAZORPAY_PLAN_ANNUAL`.
+1. Under **Subscriptions → Plans**, create a monthly plan and a yearly plan. Put their IDs in `RAZORPAY_PLAN_MONTHLY_INR` and `RAZORPAY_PLAN_ANNUAL_INR` (and the `_USD` ones for dollar plans).
 2. Under **Settings → Webhooks**, add `https://YOUR-DOMAIN/api/billing/webhook` with a secret. Enable all `subscription.*` events.
-3. Set the plan amounts (in the smallest currency unit) and the display labels in your environment. The analytics MRR uses the amounts.
+3. Set the plan IDs and amounts (in the smallest currency unit) in your environment.
 
-> Razorpay plans are usually priced in INR. If you charge in USD, you need international payments enabled on your Razorpay
-> account. You can also run an INR plan for Indian families (for example ₹249/month) and change the labels accordingly.
+**Country-based pricing.** Visitors in India see and pay rupees. Everyone else sees dollars, provided USD plans are set.
+The country comes from the hosting platform's geo header (`x-vercel-ip-country` on Vercel, `cf-ipcountry` on Cloudflare).
+Locally, set `PRICING_REGION=IN` or `INTL` to test either one.
+
+- **INR test plans (already created):** ₹749/month `plan_TvyYMAHfvVDIma`, ₹5,749/year `plan_TvyZKEnPjczZI7`.
+- **USD plans:** Razorpay's dashboard only creates INR plans. Ask Razorpay support to enable international payments for Subscriptions, then add USD plans ($9/month, $69/year) and set the `*_USD` variables. Until then, families outside India are shown and charged INR.
+- Each subscription stores the price and currency it was sold at. Analytics reports revenue separately per currency.
 
 ### 4. Run locally
 ```bash

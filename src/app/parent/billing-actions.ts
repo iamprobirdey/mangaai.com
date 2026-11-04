@@ -4,6 +4,7 @@ import { getAccess, getProfile, getUser, isParentUnlocked } from "@/lib/dal";
 import { razorpay, syncSubscription, type RazorpaySubscriptionEntity } from "@/lib/razorpay";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { serverEnv } from "@/lib/env";
+import { visitorPricing } from "@/lib/pricing";
 
 export type CheckoutResult =
   | { error: string }
@@ -17,7 +18,8 @@ export async function startSubscription(plan: "monthly" | "annual"): Promise<Che
 
   const trial = !profile.trial_used && access.state === "none";
   const startAt = trial ? Math.floor(Date.now() / 1000) + serverEnv.trialDays() * 86_400 : undefined;
-  const planId = serverEnv.plans()[plan];
+  const price = (await visitorPricing())[plan];
+  const planId = price.planId;
 
   try {
     const sub = await razorpay().subscriptions.create({
@@ -35,6 +37,8 @@ export async function startSubscription(plan: "monthly" | "annual"): Promise<Che
       status: sub.status,
       trial_end: startAt ? new Date(startAt * 1000).toISOString() : null,
       short_url: sub.short_url ?? null,
+      amount: price.amount,
+      currency: price.currency,
     });
     return { subscriptionId: sub.id, keyId: serverEnv.razorpayKeyId(), email: user?.email ?? "", trial };
   } catch (e) {

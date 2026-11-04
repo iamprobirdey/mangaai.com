@@ -1,6 +1,7 @@
 import { getAccess, getProfile } from "@/lib/dal";
 import { formatDate } from "@/lib/dates";
-import { publicEnv, serverEnv } from "@/lib/env";
+import { serverEnv } from "@/lib/env";
+import { formatMoney, visitorPricing } from "@/lib/pricing";
 import { Notice } from "@/components/ui";
 import { CancelButton, Checkout } from "./checkout";
 
@@ -12,6 +13,8 @@ export default async function BillingPage() {
   const sub = access.subscription;
   const canStart = !access.active || access.state === "grace";
   const trialAvailable = !profile.trial_used && access.state === "none";
+  const pricing = await visitorPricing();
+  const subPrice = sub?.amount && sub.currency ? formatMoney(sub.amount, sub.currency) : null;
 
   return (
     <div className="space-y-8">
@@ -21,7 +24,8 @@ export default async function BillingPage() {
         <section className="panel p-5">
           <h2 className="text-xl">Your plan</h2>
           <p className="mt-2 text-lg">
-            {sub.plan === "annual" ? `Yearly — ${publicEnv.priceAnnual}` : `Monthly — ${publicEnv.priceMonthly}`}
+            {sub.plan === "annual" ? "Yearly" : "Monthly"}
+            {subPrice ? ` — ${subPrice}` : ""}
           </p>
           <div className="mt-3 space-y-2">
             {access.state === "trial" ? (
@@ -56,7 +60,7 @@ export default async function BillingPage() {
             One plan for the whole family: every series, up to 5 readers.
             {trialAvailable ? " You won't be charged until the trial ends, and you can cancel before then." : ""}
           </p>
-          <Checkout monthly={publicEnv.priceMonthly} annual={publicEnv.priceAnnual} trial={trialAvailable} />
+          <Checkout monthly={pricing.monthly.label} annual={pricing.annual.label} trial={trialAvailable} />
           <p className="hint mt-4">Payments are handled securely by Razorpay. We never see your card details.</p>
         </section>
       ) : null}
