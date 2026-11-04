@@ -3,10 +3,13 @@ import "@fontsource/mochiy-pop-one/latin-400.css";
 import "@fontsource/atkinson-hyperlegible/latin-400.css";
 import "@fontsource/atkinson-hyperlegible/latin-700.css";
 import "./globals.css";
+import { ServiceWorker } from "@/components/service-worker";
 
 export const metadata: Metadata = {
   title: { default: "MangaAI — manga for kids", template: "%s · MangaAI" },
   description: "Safe, ad-free manga for kids, with new chapters every week. Parents pay, kids read.",
+  appleWebApp: { capable: true, title: "MangaAI", statusBarStyle: "default" },
+  icons: { apple: "/icons/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = { themeColor: "#1c1f4a", width: "device-width", initialScale: 1 };
@@ -14,7 +17,10 @@ export const viewport: Viewport = { themeColor: "#1c1f4a", width: "device-width"
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <ServiceWorker />
+      </body>
     </html>
   );
 }

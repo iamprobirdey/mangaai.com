@@ -3,7 +3,10 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { Direction } from "@/lib/constants";
 
-type Page = { n: number; url: string; w: number; h: number };
+type Page = { n: number; url: string; w: number; h: number; sm: { url: string; w: number } | null };
+
+/** Lets the browser pick the 800px rendition on phones and the full one on bigger screens. */
+const srcSet = (p: Page) => (p.sm ? `${p.sm.url} ${p.sm.w}w, ${p.url} ${p.w}w` : undefined);
 type EarnedBadge = { key: string; icon: string; name: string };
 
 type Props = {
@@ -119,6 +122,11 @@ export function Reader(props: Props) {
     if (vertical) return;
     for (const p of pages.slice(index + 1, index + 3)) {
       const img = new Image();
+      const set = srcSet(p);
+      if (set) {
+        img.sizes = "100vw";
+        img.srcset = set;
+      }
       img.src = p.url;
     }
   }, [index, pages, vertical]);
@@ -245,6 +253,8 @@ export function Reader(props: Props) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={p.url}
+                  srcSet={srcSet(p)}
+                  sizes="(min-width: 768px) 768px, 100vw"
                   width={p.w}
                   height={p.h}
                   alt={`Page ${p.n}`}
@@ -275,6 +285,8 @@ export function Reader(props: Props) {
           <img
             key={page.n}
             src={page.url}
+            srcSet={zoomed ? undefined : srcSet(page)}
+            sizes="100vw"
             width={page.w}
             height={page.h}
             alt={`Page ${page.n} of ${total}`}

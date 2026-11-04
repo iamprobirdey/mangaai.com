@@ -15,16 +15,15 @@ export default async function AdminAnalytics() {
   const admin = createAdminClient();
   const now = requestTime();
   const since30 = new Date(now - 30 * 86_400_000).toISOString();
-  const since7 = new Date(now - 7 * 86_400_000).toISOString();
   const today = localDate(serverEnv.timezone());
 
-  const [{ data: subs }, { count: families }, { count: readers }, { data: activeDays }, { count: digests }, { data: chapterStats }, { data: topSeries }] =
+  const [{ data: subs }, { count: families }, { count: readers }, { data: activeDays }, { data: digests }, { data: chapterStats }, { data: topSeries }] =
     await Promise.all([
       admin.from("subscriptions").select("plan,status,trial_end,first_charged_at,cancelled_at,updated_at,current_end").neq("status", "created"),
       admin.from("profiles").select("id", { count: "exact", head: true }).eq("role", "parent"),
       admin.from("children").select("id", { count: "exact", head: true }),
       admin.from("reading_days").select("child_id").gte("day", addDays(today, -6)),
-      admin.from("email_log").select("id", { count: "exact", head: true }).eq("kind", "weekly_digest").gte("sent_at", since7),
+      admin.from("email_log").select("opened_at").eq("kind", "weekly_digest").gte("sent_at", since30),
       admin.rpc("admin_chapter_stats", { p_limit: 25 }),
       admin.rpc("admin_top_series", { p_days: 30 }),
     ]);
@@ -72,7 +71,11 @@ export default async function AdminAnalytics() {
         <h2 className="text-xl">Engagement</h2>
         <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Stat label="Active readers, last 7 days" value={activeReaders} note={pct(activeReaders, readers ?? 0) + " of all reader profiles"} />
-          <Stat label="Weekly emails sent, last 7 days" value={digests ?? 0} note="Open rates: add Resend webhooks later" />
+          <Stat
+            label="Weekly parent email opens, last 30 days"
+            value={pct((digests ?? []).filter((d) => d.opened_at).length, (digests ?? []).length)}
+            note={`${(digests ?? []).length} emails sent`}
+          />
         </div>
       </section>
 

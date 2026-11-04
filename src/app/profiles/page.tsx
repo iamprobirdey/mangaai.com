@@ -4,6 +4,7 @@ import { Logo } from "@/components/ui";
 import { getChildren, getProfile } from "@/lib/dal";
 import { avatarEmoji } from "@/lib/constants";
 import { selectChild } from "@/app/parent/actions";
+import { ReaderButton } from "./reader-button";
 
 export const metadata = { title: "Who's reading?" };
 
@@ -21,14 +22,14 @@ export default async function ProfilesPage() {
         <ul className="mt-14 flex flex-wrap justify-center gap-6">
           {children.map((c) => (
             <li key={c.id}>
-              <form action={selectChild.bind(null, c.id)}>
+              <ReaderButton childId={c.id} action={selectChild.bind(null, c.id)}>
                 <button type="submit" className="group flex w-32 flex-col items-center gap-3">
                   <span className="grid h-28 w-28 place-items-center rounded-full border-[3px] border-ink bg-paper text-6xl shadow-[4px_4px_0_var(--color-ink)] transition-transform group-hover:-translate-y-1 group-active:translate-y-0">
                     {avatarEmoji(c.avatar)}
                   </span>
                   <span className="font-display text-lg">{c.nickname}</span>
                 </button>
-              </form>
+              </ReaderButton>
             </li>
           ))}
         </ul>

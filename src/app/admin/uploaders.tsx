@@ -4,7 +4,8 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { savePages, setCover } from "./actions";
 
-const PAGE_WIDTH = 1400; // px; large enough for tablets, small enough for phones on 4G
+const PAGE_WIDTH = 1400; // px; tablets and desktops
+const PAGE_WIDTH_SM = 800; // px; phones — roughly a third of the bytes
 const WEBP_QUALITY = 0.85;
 
 function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number) {
@@ -62,7 +63,15 @@ export function ChapterUploader({ chapterId, hasPages }: { chapterId: string; ha
 
       await supabase.storage.from("originals").upload(`${chapterId}.pdf`, file, { contentType: "application/pdf", upsert: true });
 
-      const rows: { page_number: number; image_path: string; width: number; height: number }[] = [];
+      const rows: {
+        page_number: number;
+        image_path: string;
+        width: number;
+        height: number;
+        image_path_sm: string;
+        width_sm: number;
+        height_sm: number;
+      }[] = [];
       for (let i = 1; i <= doc.numPages; i++) {
         const page = await doc.getPage(i);
         const base = page.getViewport({ scale: 1 });
@@ -71,11 +80,33 @@ export function ChapterUploader({ chapterId, hasPages }: { chapterId: string; ha
         canvas.width = Math.round(viewport.width);
         canvas.height = Math.round(viewport.height);
         await page.render({ canvas, viewport }).promise;
-        const blob = await canvasToBlob(canvas, "image/webp", WEBP_QUALITY);
-        const path = `${chapterId}/${String(i).padStart(3, "0")}-${stamp}.webp`;
-        const { error } = await supabase.storage.from("pages").upload(path, blob, { contentType: "image/webp", upsert: true });
+        const small = document.createElement("canvas");
+        small.width = PAGE_WIDTH_SM;
+        small.height = Math.round((canvas.height * PAGE_WIDTH_SM) / canvas.width);
+        const ctx = small.getContext("2d")!;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(canvas, 0, 0, small.width, small.height);
+
+        const [blob, blobSm] = await Promise.all([
+          canvasToBlob(canvas, "image/webp", WEBP_QUALITY),
+          canvasToBlob(small, "image/webp", WEBP_QUALITY),
+        ]);
+        const name = `${chapterId}/${String(i).padStart(3, "0")}-${stamp}`;
+        const [lg, sm] = await Promise.all([
+          supabase.storage.from("pages").upload(`${name}.webp`, blob, { contentType: "image/webp", upsert: true }),
+          supabase.storage.from("pages").upload(`${name}-sm.webp`, blobSm, { contentType: "image/webp", upsert: true }),
+        ]);
+        const error = lg.error ?? sm.error;
         if (error) throw new Error(`Page ${i}: ${error.message}`);
-        rows.push({ page_number: i, image_path: path, width: canvas.width, height: canvas.height });
+        rows.push({
+          page_number: i,
+          image_path: `${name}.webp`,
+          width: canvas.width,
+          height: canvas.height,
+          image_path_sm: `${name}-sm.webp`,
+          width_sm: small.width,
+          height_sm: small.height,
+        });
         page.cleanup();
         setProgress({ done: i, total: doc.numPages });
       }

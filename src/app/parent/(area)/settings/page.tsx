@@ -1,4 +1,5 @@
 import { getProfile, getUser } from "@/lib/dal";
+import { SignOutButton } from "@/components/service-worker";
 import { DeleteAccountForm, PinForm, SettingsForm } from "./settings-forms";
 
 export const metadata = { title: "Settings" };
@@ -12,9 +13,9 @@ export default async function SettingsPage() {
         <h2 className="text-xl">Account</h2>
         <p className="mt-1">Signed in as <strong>{user?.email}</strong></p>
         <SettingsForm displayName={profile.display_name ?? ""} weeklyDigest={profile.weekly_digest} />
-        <form action="/auth/signout" method="post" className="mt-4">
-          <button className="btn" type="submit">Sign out</button>
-        </form>
+        <div className="mt-4">
+          <SignOutButton />
+        </div>
       </section>
       <section className="panel p-5">
         <h2 className="text-xl">Grown-ups PIN</h2>

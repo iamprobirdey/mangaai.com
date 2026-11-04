@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     try {
       const r = await sendEmail(email, message.subject, message.html, message.text);
       if (!r.skipped) {
-        await admin.from("email_log").insert({ parent_id: parent.id, kind: "weekly_digest" });
+        await admin.from("email_log").insert({ parent_id: parent.id, kind: "weekly_digest", provider_id: r.id });
         sent++;
       } else skipped++;
     } catch (e) {

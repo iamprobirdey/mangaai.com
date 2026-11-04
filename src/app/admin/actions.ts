@@ -144,6 +144,9 @@ const pageRow = z.object({
   image_path: z.string().min(1),
   width: z.number().int().positive(),
   height: z.number().int().positive(),
+  image_path_sm: z.string().min(1).optional(),
+  width_sm: z.number().int().positive().optional(),
+  height_sm: z.number().int().positive().optional(),
 });
 
 /** Called by the uploader after every page image is in storage. Replaces the chapter's pages and sends it back to review. */
@@ -151,10 +154,12 @@ export async function savePages(chapterId: string, rows: z.infer<typeof pageRow>
   await guard();
   const parsed = z.array(pageRow).min(1).safeParse(rows);
   if (!parsed.success) return { error: "No pages were uploaded." };
-  if (!parsed.data.every((r) => r.image_path.startsWith(`${chapterId}/`))) return { error: "Unexpected file path." };
+  if (!parsed.data.every((r) => [r.image_path, r.image_path_sm ?? r.image_path].every((p) => p.startsWith(`${chapterId}/`)))) {
+    return { error: "Unexpected file path." };
+  }
 
   const admin = createAdminClient();
-  const { data: old } = await admin.from("pages").select("image_path").eq("chapter_id", chapterId);
+  const { data: old } = await admin.from("pages").select("image_path,image_path_sm").eq("chapter_id", chapterId);
   await admin.from("pages").delete().eq("chapter_id", chapterId);
   const { error } = await admin.from("pages").insert(parsed.data.map((r) => ({ ...r, chapter_id: chapterId })));
   if (error) return { error: error.message };
@@ -163,8 +168,8 @@ export async function savePages(chapterId: string, rows: z.infer<typeof pageRow>
     .update({ page_count: parsed.data.length, status: "in_review", reviewed_at: null, reviewed_by: null })
     .eq("id", chapterId);
 
-  const newPaths = new Set(parsed.data.map((r) => r.image_path));
-  const stale = (old ?? []).map((o) => o.image_path).filter((p) => !newPaths.has(p));
+  const newPaths = new Set(parsed.data.flatMap((r) => [r.image_path, r.image_path_sm]));
+  const stale = (old ?? []).flatMap((o) => [o.image_path, o.image_path_sm]).filter((p): p is string => !!p && !newPaths.has(p));
   if (stale.length) await admin.storage.from("pages").remove(stale);
   revalidatePath(`/admin/chapters/${chapterId}`);
   return { ok: `${parsed.data.length} pages ready for review.` };
@@ -200,8 +205,9 @@ export async function unpublishChapter(id: string) {
 export async function deleteChapter(id: string, seriesId: string) {
   await guard();
   const admin = createAdminClient();
-  const { data: pages } = await admin.from("pages").select("image_path").eq("chapter_id", id);
-  if (pages?.length) await admin.storage.from("pages").remove(pages.map((p) => p.image_path));
+  const { data: pages } = await admin.from("pages").select("image_path,image_path_sm").eq("chapter_id", id);
+  const files = (pages ?? []).flatMap((p) => [p.image_path, p.image_path_sm]).filter((p): p is string => !!p);
+  if (files.length) await admin.storage.from("pages").remove(files);
   await admin.storage.from("originals").remove([`${id}.pdf`]);
   await admin.from("chapters").delete().eq("id", id);
   redirect(`/admin/series/${seriesId}`);

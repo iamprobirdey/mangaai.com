@@ -1,6 +1,7 @@
 "use client";
 import { useActionState } from "react";
 import { FormMessage, SubmitButton } from "@/components/forms";
+import { clearOfflineData } from "@/components/service-worker";
 import { changePin, deleteAccount, updateSettings } from "../../actions";
 
 export function SettingsForm({ displayName, weeklyDigest }: { displayName: string; weeklyDigest: boolean }) {
@@ -44,7 +45,7 @@ export function PinForm() {
 export function DeleteAccountForm() {
   const [state, action] = useActionState(deleteAccount, undefined);
   return (
-    <form action={action} className="mt-4 space-y-3">
+    <form action={action} onSubmit={() => void clearOfflineData()} className="mt-4 space-y-3">
       <div>
         <label className="label" htmlFor="confirm">Type DELETE to confirm</label>
         <input className="field max-w-xs" id="confirm" name="confirm" autoComplete="off" required />
