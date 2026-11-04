@@ -10,6 +10,9 @@ import { requestTime } from "@/lib/dates";
 
 export const metadata = { title: "Read" };
 
+/** How long a just-approved volume stays in "New books". */
+const NEW_BOOK_HOURS = 24;
+
 type LiveChapter = Pick<Chapter, "id" | "series_id" | "number" | "title" | "cover_path" | "publish_at" | "page_count">;
 type ProgressRow = { chapter_id: string; series_id: string; last_page: number; completed_at: string | null; updated_at: string };
 
@@ -51,9 +54,10 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
     if (continueCards.length >= 4) break;
   }
 
-  const weekAgo = requestTime() - 7 * 86_400_000;
+  // New books: volumes approved in the last 24 hours, newest first.
+  const dayAgo = requestTime() - NEW_BOOK_HOURS * 3_600_000;
   const fresh = chapters
-    .filter((c) => c.publish_at && Date.parse(c.publish_at) >= weekAgo)
+    .filter((c) => c.publish_at && Date.parse(c.publish_at) >= dayAgo)
     .sort((a, b) => Date.parse(b.publish_at!) - Date.parse(a.publish_at!))
     .slice(0, 8);
   const shelf = (shelfRows ?? []).map((r) => byId.get(r.series_id)).filter(Boolean) as Series[];
@@ -121,8 +125,13 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
                   const s = byId.get(c.series_id)!;
                   return (
                     <li key={c.id}>
-                      <Link href={`/read/volume/${c.id}`} className="block">
+                      <Link href={`/read/volume/${c.id}`} className="relative block">
                         <Cover src={coverUrl(c.cover_path ?? s.cover_path)} title={volumeLabel(c)} />
+                        {!progressByChapter.has(c.id) ? (
+                          <span className="absolute left-2 top-2 rounded-full border-2 border-ink bg-sun px-2.5 py-0.5 font-display text-sm shadow-[2px_2px_0_var(--color-ink)]">
+                            New
+                          </span>
+                        ) : null}
                         <p className="mt-2 font-bold">{s.title}</p>
                         <p className="hint">{volumeLabel(c)}</p>
                       </Link>
