@@ -37,7 +37,7 @@ export const GUIDES: Guide[] = [
       {
         heading: "How to choose the right series",
         paragraphs: [
-          "Start with your child's interests: animals, sport, mystery, friendship, funny stories. Then match the age range. Read the first chapter together, or at least skim it, so you know the tone. Short, light series are a good first step before longer adventures.",
+          "Start with your child's interests: animals, sport, mystery, friendship, funny stories. Then match the age range. Read the first book together, or at least skim it, so you know the tone. Short, light series are a good first step before longer adventures.",
           "On MangaAI, every series has an age range, and each reader profile only shows stories for that child's range and younger. Parents can also hide any series and set a daily reading limit.",
         ],
       },

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Cover } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { getAccess, requireChild } from "@/lib/dal";
-import { chapterLabel, liveCutoff, seriesForChild, type Chapter, type Series } from "@/lib/content";
+import { PREVIEW_PAGES, volumeLabel, liveCutoff, seriesForChild, type Chapter, type Series } from "@/lib/content";
 import { coverUrl } from "@/lib/storage";
 import { childSummary, timeLeftSeconds } from "@/lib/reading";
 import { GENRES } from "@/lib/constants";
@@ -10,7 +10,7 @@ import { requestTime } from "@/lib/dates";
 
 export const metadata = { title: "Read" };
 
-type LiveChapter = Pick<Chapter, "id" | "series_id" | "number" | "title" | "publish_at" | "is_free_preview" | "page_count">;
+type LiveChapter = Pick<Chapter, "id" | "series_id" | "number" | "title" | "publish_at" | "page_count">;
 type ProgressRow = { chapter_id: string; series_id: string; last_page: number; completed_at: string | null; updated_at: string };
 
 export default async function KidHome({ searchParams }: PageProps<"/read">) {
@@ -24,7 +24,7 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
 
   const [{ data: chapterRows }, { data: progressRows }, { data: shelfRows }] = await Promise.all([
     seriesIds.length
-      ? supabase.from("chapters").select("id,series_id,number,title,publish_at,is_free_preview,page_count").in("series_id", seriesIds).eq("status", "approved").lte("publish_at", liveCutoff()).order("number")
+      ? supabase.from("chapters").select("id,series_id,number,title,publish_at,page_count").in("series_id", seriesIds).eq("status", "approved").lte("publish_at", liveCutoff()).order("number")
       : Promise.resolve({ data: [] }),
     supabase.from("reading_progress").select("chapter_id,series_id,last_page,completed_at,updated_at").eq("child_id", child.id).order("updated_at", { ascending: false }).limit(50),
     supabase.from("shelf").select("series_id").eq("child_id", child.id).order("created_at", { ascending: false }),
@@ -33,7 +33,7 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
   const progress = (progressRows ?? []) as ProgressRow[];
   const progressByChapter = new Map(progress.map((p) => [p.chapter_id, p]));
 
-  // Continue reading: one card per recently read series — the unfinished chapter, or the next one.
+  // Continue reading: one card per recently read series — the unfinished volume, or the next one.
   const seen = new Set<string>();
   const continueCards: { series: Series; chapter: LiveChapter; page: number }[] = [];
   for (const p of progress) {
@@ -80,7 +80,7 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
       ) : null}
       {!access.active ? (
         <p className="panel-flat p-4">
-          You can read the chapters marked <span className="tag border-leaf text-leaf">Free</span>. Ask a grown-up to unlock everything.
+          You can peek at the first {PREVIEW_PAGES} pages of every book. Ask a grown-up to start the free trial to read them all.
         </p>
       ) : null}
 
@@ -94,13 +94,13 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
               <ul className="mt-4 grid gap-4 sm:grid-cols-2">
                 {continueCards.map(({ series: s, chapter, page }) => (
                   <li key={s.id}>
-                    <Link href={`/read/chapter/${chapter.id}`} className="panel flex gap-4 p-3 hover:-translate-y-0.5">
+                    <Link href={`/read/volume/${chapter.id}`} className="panel flex gap-4 p-3 hover:-translate-y-0.5">
                       <Cover src={coverUrl(s.cover_path)} title={s.title} className="w-20 shrink-0" />
                       <div className="flex flex-col justify-center">
                         <span className="font-display">{s.title}</span>
-                        <span>{chapterLabel(chapter)}</span>
+                        <span>{volumeLabel(chapter)}</span>
                         <span className="hint">
-                          {page > 1 ? `Page ${page} of ${chapter.page_count}` : "Start the next chapter"}
+                          {page > 1 ? `Page ${page} of ${chapter.page_count}` : "Start the next volume"}
                         </span>
                       </div>
                     </Link>
@@ -112,16 +112,16 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
 
           {fresh.length ? (
             <section>
-              <h2 className="text-2xl">New this week</h2>
+              <h2 className="text-2xl">New books</h2>
               <ul className="mt-4 grid grid-cols-2 gap-5 sm:grid-cols-4">
                 {fresh.map((c) => {
                   const s = byId.get(c.series_id)!;
                   return (
                     <li key={c.id}>
-                      <Link href={`/read/chapter/${c.id}`} className="block">
+                      <Link href={`/read/volume/${c.id}`} className="block">
                         <Cover src={coverUrl(s.cover_path)} title={s.title} />
                         <p className="mt-2 font-bold">{s.title}</p>
-                        <p className="hint">{chapterLabel(c)}</p>
+                        <p className="hint">{volumeLabel(c)}</p>
                       </Link>
                     </li>
                   );

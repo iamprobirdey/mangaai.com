@@ -9,9 +9,9 @@ import { isIndexable, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
-  title: { default: "MangaAI — safe manga for kids, new chapters every week", template: "%s · MangaAI" },
+  title: { default: "MangaAI — safe manga books for kids", template: "%s · MangaAI" },
   description:
-    "Age-right manga for kids aged 4 to 13+, with new chapters every week. No ads, no chat. Parents pay and stay in charge with a PIN, reading limits and a weekly email.",
+    "Age-right manga books for kids aged 4 to 13+. No ads, no chat. Parents pay and stay in charge with a PIN, reading limits and a weekly email.",
   applicationName: "MangaAI",
   openGraph: { type: "website", siteName: "MangaAI", locale: "en_IN", url: "/" },
   twitter: { card: "summary_large_image" },

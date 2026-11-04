@@ -46,7 +46,7 @@ export async function weeklyStats(supabase: SupabaseClient, childIds: string[]):
         .map((r) => {
           const ch = r.chapters as unknown as { number: number; title: string | null } | null;
           const se = r.series as unknown as { title: string } | null;
-          return { title: ch?.title ? `Ch. ${Number(ch.number)}: ${ch.title}` : `Ch. ${Number(ch?.number)}`, series: se?.title ?? "" };
+          return { title: ch?.title ? `Vol. ${Number(ch.number)}: ${ch.title}` : `Vol. ${Number(ch?.number)}`, series: se?.title ?? "" };
         }),
       badges: (badges.data ?? []).filter((b) => b.child_id === id).map((b) => b.badge_key),
     });

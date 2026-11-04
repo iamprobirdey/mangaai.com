@@ -9,7 +9,7 @@ export function GET() {
   const base = siteUrl();
   const body = `# MangaAI
 
-> MangaAI is a subscription manga reading service made for children. A parent or guardian creates the family account and pays; each child gets a reader profile limited to stories for their age range. There are no ads, no chat and no contact with strangers. New chapters are released every week. Stories are created with AI tools and every page is reviewed by a person before publishing.
+> MangaAI is a subscription manga reading service made for children. A parent or guardian creates the family account and pays; each child gets a reader profile limited to stories for their age range. There are no ads, no chat and no contact with strangers. Each series is a run of volumes, and each volume is a complete book. Families can preview the first pages of every book, and read everything during a 7-day free trial or with a subscription. Stories are created with AI tools and every page is reviewed by a person before publishing.
 
 ## For parents
 - [How MangaAI works and pricing](${base}/)

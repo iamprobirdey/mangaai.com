@@ -96,7 +96,7 @@ export default async function AdminAnalytics() {
             <tr>
               <th className="p-3">Series</th>
               <th className="p-3">Readers</th>
-              <th className="p-3">Chapters finished</th>
+              <th className="p-3">Books finished</th>
             </tr>
           </thead>
           <tbody>
@@ -121,7 +121,7 @@ export default async function AdminAnalytics() {
           <table className="w-full text-left">
             <thead className="border-b-2 border-ink bg-tone">
               <tr>
-                <th className="p-3">Chapter</th>
+                <th className="p-3">Volume</th>
                 <th className="p-3">Started</th>
                 <th className="p-3">Finished</th>
                 <th className="p-3">Most common stop</th>
@@ -142,7 +142,7 @@ export default async function AdminAnalytics() {
                 }) => (
                   <tr key={c.chapter_id} className="border-b border-tone-deep last:border-0">
                     <td className="p-3">
-                      <span className="font-bold">{c.series_title}</span> — Ch. {Number(c.chapter_number)}
+                      <span className="font-bold">{c.series_title}</span> — Vol. {Number(c.chapter_number)}
                       {c.chapter_title ? `: ${c.chapter_title}` : ""}
                     </td>
                     <td className="p-3">{c.readers}</td>
@@ -154,7 +154,7 @@ export default async function AdminAnalytics() {
                 ),
               )}
               {!chapterStats?.length ? (
-                <tr><td className="p-3" colSpan={4}>No approved chapters yet.</td></tr>
+                <tr><td className="p-3" colSpan={4}>No approved volumes yet.</td></tr>
               ) : null}
             </tbody>
           </table>

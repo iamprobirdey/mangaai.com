@@ -57,7 +57,7 @@ const FAQ = [
   },
   {
     q: "Which devices does it work on?",
-    a: "Any modern browser on a tablet, phone or laptop. You can add MangaAI to your home screen like an app, and chapters your child has opened recently keep working offline for a week.",
+    a: "Any modern browser on a tablet, phone or laptop. You can add MangaAI to your home screen like an app, and books your child has opened recently keep working offline for a week.",
   },
   {
     q: "How do I cancel?",
@@ -147,7 +147,7 @@ export default async function Home() {
                 Turn screen time into <span className="mx-mark">reading time.</span>
               </h1>
               <p className="m-0 max-w-[540px] text-[21px] leading-[1.55] text-[#333333]">
-                A whole library of action-packed manga made for kids — with new chapters every Friday, a reader built for little
+                A whole library of action-packed manga made for kids — whole books to read, a reader built for little
                 thumbs, and controls parents actually trust.
               </p>
               <div className="flex flex-wrap items-center gap-3">
@@ -158,7 +158,7 @@ export default async function Home() {
                   Start your 7-day free trial
                 </Link>
                 <Link href="#library" className="border-[3px] border-ink bg-white px-[22px] py-[18px] text-[17px] font-extrabold text-ink no-underline">
-                  Read a free chapter
+                  Peek inside a book
                 </Link>
               </div>
               <p className="m-0 text-[15px] font-semibold text-[#444444]">{priceLine}</p>
@@ -174,7 +174,7 @@ export default async function Home() {
                 className="block h-auto w-full border-4 border-ink bg-white shadow-[12px_12px_0_#111111]"
               />
               <div className="absolute -bottom-[22px] -left-3.5 -rotate-3 border-[3px] border-ink bg-white px-4 py-3 text-base font-black">
-                NEW CHAPTERS EVERY FRIDAY!
+                READ WHOLE BOOKS, FREE FOR 7 DAYS!
               </div>
             </div>
           </div>
@@ -266,7 +266,7 @@ export default async function Home() {
               <h2 className="m-0 text-[clamp(34px,4vw,52px)] leading-[1.08]">Screen time you can feel good about.</h2>
               <ul className="m-0 flex list-none flex-col gap-[18px] p-0">
                 {[
-                  ["Weekly reading report", "— pages read, chapters finished and reading streak, straight to your inbox."],
+                  ["Weekly reading report", "— pages read, books finished and reading streak, straight to your inbox."],
                   ["Age-rated library", "— every title tagged 4–6, 7–9, 10–12 or 13+. Hide any series, set daily reading limits."],
                   ["Zero ads, zero chat", "— no strangers, no pop-ups, no in-app purchases."],
                   ["Privacy first", "— kids use a nickname only. We never sell or share family data."],
@@ -290,7 +290,7 @@ export default async function Home() {
               <div className="grid grid-cols-3 gap-3 text-center">
                 {[
                   ["86", "pages read", "bg-[#F2F2F2]"],
-                  ["5", "chapters", "bg-[#F2F2F2]"],
+                  ["2", "books", "bg-[#F2F2F2]"],
                   ["4", "day streak", "bg-sun"],
                 ].map(([n, label, bg]) => (
                   <div key={label} className={`${bg} flex flex-col gap-1 px-2 py-4`}>
@@ -322,8 +322,8 @@ export default async function Home() {
               {[
                 ["Swipe-to-read", "Real manga page turns, zoom, and right-to-left mode."],
                 ["Streaks & badges", "Rewards for reading every other day and finishing a series."],
-                ["Friday drops", "Fresh chapters every week give them something to look forward to."],
-                ["My shelf", "Save favourites and see their new chapters first."],
+                ["Whole books", "Each volume is a complete book, so they can read it start to finish."],
+                ["My shelf", "Save favourites and see their new volumes first."],
               ].map(([title, body]) => (
                 <li key={title} className="flex flex-col gap-2 border-2 border-white p-6">
                   <strong className="text-[19px] text-sun">{title}</strong>
@@ -375,7 +375,7 @@ export default async function Home() {
                   {[
                     "Unlimited access to the whole library",
                     `Up to ${MAX_READERS} kid profiles`,
-                    "New chapters every Friday",
+                    "Read every book in full",
                     "Weekly parent reading report",
                     "No ads, no chat, no in-app purchases",
                   ].map((f) => (
@@ -440,7 +440,7 @@ export default async function Home() {
       <JsonLd
         data={[
           { "@context": "https://schema.org", "@type": "Organization", name: "MangaAI", url: siteUrl(), logo: `${siteUrl()}/icons/icon-512.png` },
-          { "@context": "https://schema.org", "@type": "WebSite", name: "MangaAI", url: siteUrl(), description: "Safe, ad-free manga for kids with new chapters every week." },
+          { "@context": "https://schema.org", "@type": "WebSite", name: "MangaAI", url: siteUrl(), description: "Safe, ad-free manga books for kids." },
           {
             "@context": "https://schema.org",
             "@type": "FAQPage",

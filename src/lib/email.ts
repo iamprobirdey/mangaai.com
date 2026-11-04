@@ -59,7 +59,7 @@ export function weeklyDigestEmail(
           .slice(0, 8)
           .map((c) => `<li><strong>${esc(c.series)}</strong> — ${esc(c.title)}</li>`)
           .join("")}</ul>`
-      : `<p style="margin:8px 0 0;color:#4a4e7a">No chapters finished this week.</p>`;
+      : `<p style="margin:8px 0 0;color:#4a4e7a">No books finished this week.</p>`;
     const badges = week.badges.length
       ? `<p style="margin:10px 0 0">New badges: ${week.badges
           .map((b) => `${BADGES[b as BadgeKey]?.icon ?? ""} ${esc(BADGES[b as BadgeKey]?.name ?? b)}`)

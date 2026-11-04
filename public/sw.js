@@ -131,7 +131,7 @@ self.addEventListener("fetch", (event) => {
   if (req.mode !== "navigate") return;
 
   // Chapter pages: network first, keep a copy for offline reading.
-  if (url.pathname.startsWith("/read/chapter/")) {
+  if (url.pathname.startsWith("/read/volume/")) {
     event.respondWith(
       (async () => {
         const cache = await caches.open(CHAPTERS);

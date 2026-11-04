@@ -14,24 +14,25 @@ export type Series = {
   reading_direction: Direction;
   status: "draft" | "published" | "archived";
   is_ai_generated: boolean;
-  release_day: number | null;
   created_at: string;
 };
 
+/**
+ * One volume of a series: a single uploaded PDF (one book). Stored in the `chapters` table.
+ */
 export type Chapter = {
   id: string;
   series_id: string;
-  volume_id: string | null;
   number: number;
   title: string | null;
-  is_free_preview: boolean;
   status: "draft" | "in_review" | "approved";
   publish_at: string | null;
   page_count: number;
   reviewed_at: string | null;
 };
 
-export type Volume = { id: string; series_id: string; number: number; title: string | null };
+/** Families without a trial or plan can read this many pages of every volume. */
+export const PREVIEW_PAGES = 3;
 
 export async function hiddenSeriesIds(childId: string) {
   const supabase = await createClient();
@@ -59,11 +60,10 @@ export function childCanSee(child: Child, series: Series, hidden: Set<string>) {
 }
 
 /**
- * Kids only ever see approved chapters whose release time has passed. RLS enforces this for
- * parents, but admins can read every chapter, so reader screens filter explicitly too
- * (status = approved, publish_at <= now) and readableChapter re-checks here.
+ * Kids only ever see approved volumes. RLS enforces this for parents, but admins can read every
+ * row, so reader screens filter explicitly too (status = approved, publish_at <= now) and
+ * readableChapter re-checks here.
  */
-/** ISO timestamp for "released by now" filters. */
 export function liveCutoff() {
   return new Date().toISOString();
 }
@@ -72,7 +72,7 @@ export function chapterIsLive(c: Pick<Chapter, "status" | "publish_at">) {
   return c.status === "approved" && !!c.publish_at && Date.parse(c.publish_at) <= Date.now();
 }
 
-/** A live chapter plus its series, or null if the child may not open it. */
+/** A live volume plus its series, or null if the child may not open it. */
 export async function readableChapter(child: Child, chapterId: string) {
   const supabase = await createClient();
   const { data } = await supabase.from("chapters").select("*, series(*)").eq("id", chapterId).maybeSingle();
@@ -83,7 +83,7 @@ export async function readableChapter(child: Child, chapterId: string) {
   return { chapter: chapter as Chapter, series };
 }
 
-export function chapterLabel(c: Pick<Chapter, "number" | "title">) {
+export function volumeLabel(c: Pick<Chapter, "number" | "title">) {
   const n = Number(c.number) % 1 === 0 ? Number(c.number).toFixed(0) : String(c.number);
-  return c.title ? `Chapter ${n}: ${c.title}` : `Chapter ${n}`;
+  return c.title ? `Volume ${n}: ${c.title}` : `Volume ${n}`;
 }

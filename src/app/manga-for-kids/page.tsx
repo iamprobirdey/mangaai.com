@@ -14,7 +14,7 @@ export const revalidate = 600;
 export const metadata: Metadata = {
   title: "Manga for kids, by age: safe, age-right manga series",
   description:
-    "Kid-friendly manga sorted by age, from gentle picture stories for 4–6 year olds to adventures for young teens. No ads, no chat, new chapters every week.",
+    "Kid-friendly manga sorted by age, from gentle picture stories for 4–6 year olds to adventures for young teens. No ads, no chat, whole books to read.",
   alternates: { canonical: "/manga-for-kids" },
 };
 

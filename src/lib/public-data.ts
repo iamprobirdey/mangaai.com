@@ -23,14 +23,13 @@ export type PublicSeries = {
   age_band: AgeBand;
   genres: string[];
   reading_direction: "rtl" | "ltr" | "vertical";
-  release_day: number | null;
   is_ai_generated: boolean;
   updated_at: string;
 };
 
-export type PublicChapter = { id: string; number: number; title: string | null; is_free_preview: boolean; publish_at: string };
+export type PublicChapter = { id: string; number: number; title: string | null; page_count: number; publish_at: string };
 
-const SERIES_FIELDS = "id,slug,title,synopsis,cover_path,age_band,genres,reading_direction,release_day,is_ai_generated,updated_at";
+const SERIES_FIELDS = "id,slug,title,synopsis,cover_path,age_band,genres,reading_direction,is_ai_generated,updated_at";
 
 export async function publishedSeries(): Promise<PublicSeries[]> {
   const db = anon();
@@ -50,15 +49,15 @@ export async function publicSeriesBySlug(slug: string) {
   if (!series) return null;
   const { data: chapters } = await db
     .from("chapters")
-    .select("id,number,title,is_free_preview,publish_at")
+    .select("id,number,title,page_count,publish_at")
     .eq("series_id", series.id)
     .order("number");
   return { series: series as PublicSeries, chapters: (chapters ?? []) as PublicChapter[] };
 }
 
-/** First few pages of the series' first free chapter, as short-lived signed URLs (phone-sized rendition). */
+/** First few pages of the series' first volume (the same pages anyone can peek at), as short-lived signed URLs. */
 export async function samplePages(chapters: PublicChapter[], count = 3) {
-  const free = chapters.find((c) => c.is_free_preview);
+  const free = chapters[0];
   if (!free) return [];
   const admin = createAdminClient();
   const { data: pages } = await admin

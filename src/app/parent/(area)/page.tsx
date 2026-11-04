@@ -23,7 +23,7 @@ export default async function ParentOverview() {
 
       {access.state === "none" ? (
         <Notice>
-          Free preview chapters are open. <Link className="underline" href="/parent/billing">Start the free trial</Link> to unlock every series.
+          Kids can peek at the first few pages of every book. <Link className="underline" href="/parent/billing">Start the free trial</Link> to read every book in full.
         </Notice>
       ) : access.state === "trial" ? (
         <Notice>Free trial until {formatDate(access.until)}. Your first payment is taken then.</Notice>
@@ -66,7 +66,7 @@ export default async function ParentOverview() {
                   <dd className="font-display text-lg">{s.streak} {s.streak === 1 ? "day" : "days"}</dd>
                 </div>
               </dl>
-              <h3 className="mt-5 text-base">Chapters finished</h3>
+              <h3 className="mt-5 text-base">Books finished</h3>
               {s.chaptersFinished.length ? (
                 <ul className="mt-2 space-y-1">
                   {s.chaptersFinished.slice(0, 6).map((ch, i) => (

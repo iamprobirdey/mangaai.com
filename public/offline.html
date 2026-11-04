@@ -28,9 +28,9 @@
   <main>
     <div style="font-size:44px" aria-hidden="true">📡</div>
     <h1>You're offline</h1>
-    <p>Chapters you opened in the last 7 days can still be read.</p>
+    <p>Books you opened in the last 7 days can still be read.</p>
     <ul id="saved"></ul>
-    <p id="empty" class="hint" hidden>No saved chapters yet. Open a chapter while online to keep it for later.</p>
+    <p id="empty" class="hint" hidden>No saved books yet. Open a book while online to keep it for later.</p>
     <button type="button" onclick="location.reload()">Try again</button>
   </main>
 <script>
@@ -46,7 +46,7 @@
         var res = await cache.match(reqs[i]);
         var html = res ? await res.text() : "";
         var m = /<title>([^<]*)<\/title>/.exec(html);
-        var title = (m ? m[1] : "A saved chapter").replace(" · MangaAI", "").replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'");
+        var title = (m ? m[1] : "A saved book").replace(" · MangaAI", "").replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'");
         var li = document.createElement("li");
         var a = document.createElement("a");
         a.className = "btn";

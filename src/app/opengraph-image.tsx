@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "MangaAI — manga made for kids, with new chapters every week";
+export const alt = "MangaAI — manga books made for kids";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -55,7 +55,7 @@ export default function OpengraphImage() {
             maxWidth: 980,
           }}
         >
-          Manga made for kids, with new chapters every week.
+          Manga books made for kids. No ads, no chat.
         </div>
         <div style={{ fontSize: 30 }}>Age-right stories · No ads · No chat · Parents stay in charge</div>
       </div>

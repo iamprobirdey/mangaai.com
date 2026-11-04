@@ -10,15 +10,15 @@ export type BadgeKey =
   | "explorer";
 
 export const BADGES: Record<BadgeKey, { icon: string; name: string; how: string }> = {
-  first_chapter: { icon: "🌱", name: "First chapter", how: "Finish your first chapter" },
-  chapters_5: { icon: "📚", name: "Page turner", how: "Finish 5 chapters" },
-  chapters_25: { icon: "🦉", name: "Bookworm", how: "Finish 25 chapters" },
-  chapters_100: { icon: "🏆", name: "Manga master", how: "Finish 100 chapters" },
+  first_chapter: { icon: "🌱", name: "First book", how: "Finish your first book" },
+  chapters_5: { icon: "📚", name: "Page turner", how: "Finish 5 books" },
+  chapters_25: { icon: "🦉", name: "Bookworm", how: "Finish 25 books" },
+  chapters_100: { icon: "🏆", name: "Manga master", how: "Finish 100 books" },
   streak_3: { icon: "🔥", name: "Warming up", how: "Reach a 3-day reading streak" },
   streak_7: { icon: "🌟", name: "Week of stories", how: "Reach a 7-day reading streak" },
   streak_30: { icon: "🚀", name: "Unstoppable", how: "Reach a 30-day reading streak" },
-  series_finisher: { icon: "🎌", name: "Series finisher", how: "Read every chapter of a series" },
-  explorer: { icon: "🧭", name: "Explorer", how: "Finish chapters in 3 different genres" },
+  series_finisher: { icon: "🎌", name: "Series finisher", how: "Read every volume of a series" },
+  explorer: { icon: "🧭", name: "Explorer", how: "Finish books in 3 different genres" },
 };
 
 export const BADGE_ORDER = Object.keys(BADGES) as BadgeKey[];

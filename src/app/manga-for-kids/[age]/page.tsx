@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps<"/manga-for-kids/[a
   const copy = AGE_PAGE_COPY[band];
   return {
     title: copy.title,
-    description: `${copy.intro.split(". ")[0]}. Safe, ad-free manga with new chapters every week.`.slice(0, 160),
+    description: `${copy.intro.split(". ")[0]}. Safe, ad-free manga books, free for 7 days.`.slice(0, 160),
     alternates: { canonical: `/manga-for-kids/${age}` },
   };
 }

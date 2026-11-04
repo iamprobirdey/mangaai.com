@@ -33,7 +33,7 @@ export default async function AdminSeriesPage() {
                 <th className="p-3">Title</th>
                 <th className="p-3">Age range</th>
                 <th className="p-3">Status</th>
-                <th className="p-3">Chapters</th>
+                <th className="p-3">Volumes</th>
                 <th className="p-3">Waiting for review</th>
               </tr>
             </thead>

@@ -17,7 +17,9 @@ type Props = {
   pages: Page[];
   startPage: number;
   seriesHref: string;
-  next: { href: string; label: string; locked: boolean } | null;
+  next: { href: string; label: string } | null;
+  /** Set when the family has no trial or plan: only the first pages were sent. */
+  preview: { totalPages: number } | null;
   childId: string;
   avatar: string;
 };
@@ -46,7 +48,7 @@ export function Reader(props: Props) {
   const vertical = direction === "vertical";
   const rtl = direction === "rtl";
 
-  // index === total means the "chapter finished" screen.
+  // index === total means the "book finished" screen (or "preview over" in preview mode).
   const [index, setIndex] = useState(Math.max(0, props.startPage - 1));
   const [chrome, setChrome] = useState(true);
   const [zoomed, setZoomed] = useState(false);
@@ -221,7 +223,24 @@ export function Reader(props: Props) {
   const page = pages[Math.min(index, total - 1)];
   const progressPct = Math.round((Math.min(index + 1, total) / total) * 100);
 
-  const endScreen = (
+  const previewEnd = props.preview ? (
+    <div className="mx-auto flex max-w-md flex-col items-center px-6 py-16 text-center text-paper">
+      <div className="text-6xl" aria-hidden>🔒</div>
+      <h2 className="mt-4 text-3xl">Want to see what happens next?</h2>
+      <p className="mt-2 text-lg">
+        That was the free peek at {props.chapterTitle}. There are {props.preview.totalPages - total} more pages!
+      </p>
+      <p className="mt-6 rounded-lg border-2 border-paper p-4">Ask a grown-up to start the free trial to read the whole book.</p>
+      <div className="mt-6 flex w-full flex-col gap-3">
+        <Link href={props.seriesHref} className="btn">Back to the series</Link>
+        {!vertical ? (
+          <button type="button" className="btn btn-quiet text-paper" onClick={() => go(-1)}>Read the last page again</button>
+        ) : null}
+      </div>
+    </div>
+  ) : null;
+
+  const endScreen = previewEnd ?? (
     <div className="mx-auto flex max-w-md flex-col items-center px-6 py-16 text-center text-paper">
       <div className="text-6xl" aria-hidden>{props.avatar}</div>
       <h2 className="mt-4 text-3xl">You finished it!</h2>
@@ -237,13 +256,9 @@ export function Reader(props: Props) {
       ) : null}
       <div className="mt-8 flex w-full flex-col gap-3">
         {props.next ? (
-          props.next.locked ? (
-            <p className="rounded-lg border-2 border-paper p-4">The next chapter is for members. Ask a grown-up to unlock it.</p>
-          ) : (
-            <Link href={props.next.href} className="btn btn-primary text-lg">Read {props.next.label}</Link>
-          )
+          <Link href={props.next.href} className="btn btn-primary text-lg">Read {props.next.label}</Link>
         ) : (
-          <p className="rounded-lg border-2 border-paper p-4">You&apos;re all caught up. New chapters are coming soon!</p>
+          <p className="rounded-lg border-2 border-paper p-4">You&apos;re all caught up. New books are coming soon!</p>
         )}
         <Link href={props.seriesHref} className="btn">Back to the series</Link>
         {!vertical ? (
@@ -265,7 +280,7 @@ export function Reader(props: Props) {
           <p className="truncate text-sm opacity-80">{props.chapterTitle}</p>
         </div>
         <p className="shrink-0 text-sm font-bold" aria-live="polite">
-          {atEnd ? "Done" : `${index + 1} / ${total}`}
+          {atEnd ? (props.preview ? "Preview" : "Done") : `${index + 1} / ${props.preview?.totalPages ?? total}`}
         </p>
         {!vertical && !atEnd ? (
           <button type="button" className="btn min-h-0 px-3 py-1" onClick={() => setZoomed((z) => !z)} aria-pressed={zoomed}>
@@ -387,7 +402,7 @@ export function Reader(props: Props) {
         </div>
       ) : null}
 
-      {toast ? (
+      {toast && !atEnd ? (
         <div className="pointer-events-none absolute inset-x-0 bottom-20 z-40 flex justify-center px-4" role="status">
           <div className="animate-pop-in rounded-xl border-[3px] border-paper bg-pop px-5 py-3 text-center font-bold shadow-[4px_4px_0_#000]">
             {toast.map((b) => (

@@ -1,4 +1,4 @@
-import { AGE_BANDS, AGE_BAND_LABELS, DAYS, DIRECTION_LABELS, GENRES } from "@/lib/constants";
+import { AGE_BANDS, AGE_BAND_LABELS, DIRECTION_LABELS, GENRES } from "@/lib/constants";
 import type { Series } from "@/lib/content";
 
 export function SeriesFields({ series }: { series?: Partial<Series> }) {
@@ -18,7 +18,7 @@ export function SeriesFields({ series }: { series?: Partial<Series> }) {
         <label className="label" htmlFor="synopsis">Synopsis</label>
         <textarea className="field min-h-28" id="synopsis" name="synopsis" defaultValue={series?.synopsis} maxLength={2000} />
       </div>
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="label" htmlFor="age_band">Age range (required)</label>
           <select className="field" id="age_band" name="age_band" defaultValue={series?.age_band ?? ""} required>
@@ -30,18 +30,9 @@ export function SeriesFields({ series }: { series?: Partial<Series> }) {
         </div>
         <div>
           <label className="label" htmlFor="reading_direction">Reading direction</label>
-          <select className="field" id="reading_direction" name="reading_direction" defaultValue={series?.reading_direction ?? "rtl"}>
+          <select className="field" id="reading_direction" name="reading_direction" defaultValue={series?.reading_direction ?? "ltr"}>
             {Object.entries(DIRECTION_LABELS).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="label" htmlFor="release_day">Weekly release day</label>
-          <select className="field" id="release_day" name="release_day" defaultValue={series?.release_day ?? ""}>
-            <option value="">Not set</option>
-            {DAYS.map((d, i) => (
-              <option key={d} value={i}>{d}</option>
             ))}
           </select>
         </div>

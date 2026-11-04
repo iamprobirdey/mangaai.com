@@ -41,10 +41,10 @@ export function CoverUploader({ seriesId }: { seriesId: string }) {
 }
 
 /**
- * Turns a chapter PDF into page images in the browser (pdf.js → canvas → WebP), uploads them to the
+ * Turns a volume PDF (one book) into page images in the browser (pdf.js → canvas → WebP), uploads them to the
  * private `pages` bucket, and keeps the original PDF in the private `originals` bucket. Readers never get the PDF.
  */
-export function ChapterUploader({ chapterId, hasPages }: { chapterId: string; hasPages: boolean }) {
+export function VolumeUploader({ chapterId, hasPages }: { chapterId: string; hasPages: boolean }) {
   const router = useRouter();
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [message, setMessage] = useState<{ error?: string; ok?: string }>({});
@@ -122,7 +122,7 @@ export function ChapterUploader({ chapterId, hasPages }: { chapterId: string; ha
   return (
     <div>
       <label className={`btn btn-primary cursor-pointer ${busy ? "pointer-events-none opacity-60" : ""}`}>
-        {hasPages ? "Replace pages from a PDF" : "Upload chapter PDF"}
+        {hasPages ? "Replace pages from a PDF" : "Upload book PDF"}
         <input type="file" accept="application/pdf" className="sr-only" disabled={busy} onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
       </label>
       {progress ? (
@@ -137,7 +137,7 @@ export function ChapterUploader({ chapterId, hasPages }: { chapterId: string; ha
       ) : null}
       {message.error ? <p role="alert" className="mt-2 font-bold text-alert">{message.error}</p> : null}
       {message.ok ? <p role="status" className="mt-2 font-bold text-leaf">{message.ok}</p> : null}
-      <p className="hint mt-2">Keep this tab open until it finishes. Uploading new pages sends the chapter back to review.</p>
+      <p className="hint mt-2">Keep this tab open until it finishes. Uploading a new PDF sends the volume back to review.</p>
     </div>
   );
 }

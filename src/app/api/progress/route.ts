@@ -9,15 +9,18 @@ import { BADGES } from "@/lib/badges";
 
 const body = z.object({ chapterId: z.string().uuid(), page: z.number().int().min(1).max(2000) });
 
-/** Saves the reader's current page. Finishing the last page completes the chapter and may earn badges. */
+/** Saves the reader's current page. Finishing the last page completes the volume and may earn badges. */
 export async function POST(request: NextRequest) {
   const parsed = body.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad request" }, { status: 400 });
   const r = await resolveReader(parsed.data.chapterId);
   if ("error" in r) return NextResponse.json({ error: r.error }, { status: r.status });
 
-  const { child, chapter, series } = r;
-  const page = Math.min(parsed.data.page, Math.max(chapter.page_count, 1));
+  const { child, chapter, series, previewPages } = r;
+  // In preview mode the reader only has the first few pages, so progress stops there and the
+  // book can't be completed (no badges) until the family starts a trial.
+  const cap = previewPages === null || chapter.page_count <= previewPages ? chapter.page_count : previewPages;
+  const page = Math.min(parsed.data.page, Math.max(cap, 1));
   const admin = createAdminClient();
   const { data: prev } = await admin
     .from("reading_progress")

@@ -16,7 +16,7 @@ export default function PrivacyPage() {
         <h2 className="text-xl" id="children">What we collect about children</h2>
         <p>
           For each reader profile we store only a nickname, a preset animal avatar and an age range, plus reading activity: which
-          chapters were opened, the last page read, reading time per day, and badges earned. We do not collect a child&apos;s real
+          books were opened, the last page read, reading time per day, and badges earned. We do not collect a child&apos;s real
           name, photo, birthday, email, location or voice, and there is no chat or messaging.
         </p>
         <h2 className="text-xl">What we collect about parents</h2>
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
           any time with &quot;Cookie settings&quot; at the bottom of public pages.
         </p>
         <p>
-          What children read (chapters, pages, reading time) is measured by MangaAI itself to run the service, show progress and
+          What children read (books, pages, reading time) is measured by MangaAI itself to run the service, show progress and
           send parents the weekly summary. It is never shared with analytics or advertising companies.
         </p>
         <h2 className="text-xl">Your controls</h2>

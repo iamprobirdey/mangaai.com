@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "MangaAI — manga for kids",
     short_name: "MangaAI",
-    description: "Safe, ad-free manga for kids, with new chapters every week.",
+    description: "Safe, ad-free manga books for kids.",
     start_url: "/profiles",
     scope: "/",
     display: "standalone",

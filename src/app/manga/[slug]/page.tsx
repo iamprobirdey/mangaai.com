@@ -6,8 +6,8 @@ import { JsonLd } from "@/components/json-ld";
 import { PublicFooter, PublicHeader, PublicSite } from "@/components/public-chrome";
 import { publicSeriesBySlug, samplePages } from "@/lib/public-data";
 import { coverUrl } from "@/lib/storage";
-import { AGE_BAND_LABELS, DAYS } from "@/lib/constants";
-import { chapterLabel } from "@/lib/content";
+import { AGE_BAND_LABELS } from "@/lib/constants";
+import { PREVIEW_PAGES, volumeLabel } from "@/lib/content";
 import { AGE_RANGE_SCHEMA, AGE_SLUGS, SITE_NAME, siteUrl } from "@/lib/site";
 
 export const revalidate = 600;
@@ -40,7 +40,6 @@ export default async function PublicSeriesPage({ params }: PageProps<"/manga/[sl
   if (!found) notFound();
   const { series, chapters } = found;
   const samples = await samplePages(chapters).catch(() => []);
-  const firstFree = chapters.find((c) => c.is_free_preview);
   const base = siteUrl();
   const cover = coverUrl(series.cover_path);
 
@@ -57,7 +56,7 @@ export default async function PublicSeriesPage({ params }: PageProps<"/manga/[sl
           <div>
             <Cover src={cover} title={series.title} alt={`${series.title} cover`} />
             <div className="mt-4 flex flex-col gap-2">
-              <Link href="/signup" className="btn btn-primary">{firstFree ? "Read chapter 1 free" : "Start your free trial"}</Link>
+              <Link href="/signup" className="btn btn-primary">{chapters.length ? "Read the whole book free for 7 days" : "Start your free trial"}</Link>
               <Link href={`/read/series/${series.slug}`} className="btn">Already a member? Open it</Link>
             </div>
           </div>
@@ -71,7 +70,11 @@ export default async function PublicSeriesPage({ params }: PageProps<"/manga/[sl
               {series.reading_direction === "rtl" ? <span className="tag">Reads right to left</span> : null}
             </div>
             <p className="mt-5 max-w-prose text-lg">{series.synopsis}</p>
-            {series.release_day !== null ? <p className="mt-3 font-bold">New chapters every {DAYS[series.release_day]}.</p> : null}
+            {chapters.length ? (
+              <p className="mt-3 font-bold">
+                {chapters.length === 1 ? "1 book" : `${chapters.length} books`} · peek at the first {PREVIEW_PAGES} pages of each, or read everything in the free trial.
+              </p>
+            ) : null}
             {series.is_ai_generated ? <p className="hint mt-2">Made with AI tools and checked page by page by our team.</p> : null}
 
             {samples.length ? (
@@ -89,18 +92,18 @@ export default async function PublicSeriesPage({ params }: PageProps<"/manga/[sl
             ) : null}
 
             <section className="mt-10">
-              <h2 className="text-xl">Chapters</h2>
+              <h2 className="text-xl">Volumes</h2>
               {chapters.length ? (
                 <ul className="mt-3 divide-y-2 divide-tone-deep rounded-lg border-[3px] border-ink bg-paper">
                   {chapters.map((c) => (
                     <li key={c.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                      <span className="font-bold">{chapterLabel(c)}</span>
-                      {c.is_free_preview ? <span className="tag border-leaf text-leaf">Free</span> : <span className="hint">Members</span>}
+                      <span className="font-bold">{volumeLabel(c)}</span>
+                      <span className="hint">{c.page_count} pages</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="mt-2">The first chapter is coming soon.</p>
+                <p className="mt-2">The first book is coming soon.</p>
               )}
             </section>
           </div>
@@ -123,11 +126,12 @@ export default async function PublicSeriesPage({ params }: PageProps<"/manga/[sl
             isAccessibleForFree: false,
             publisher: { "@type": "Organization", name: SITE_NAME, url: base },
             hasPart: chapters.slice(0, 50).map((c) => ({
-              "@type": "ComicIssue",
-              name: chapterLabel(c),
-              issueNumber: String(Number(c.number)),
+              "@type": "Book",
+              name: volumeLabel(c),
+              bookEdition: `Volume ${Number(c.number)}`,
+              numberOfPages: c.page_count,
               datePublished: c.publish_at,
-              isAccessibleForFree: c.is_free_preview,
+              isAccessibleForFree: false,
             })),
           },
           {
