@@ -26,7 +26,7 @@ export const viewport: Viewport = { themeColor: "#1c1f4a", width: "device-width"
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
         <ServiceWorker />
         <Analytics />
