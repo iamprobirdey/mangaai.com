@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PublicFooter, PublicHeader } from "@/components/public-chrome";
+import { PublicFooter, PublicHeader, PublicSite } from "@/components/public-chrome";
 import { GUIDES } from "@/lib/guides";
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function GuidesIndex() {
   return (
-    <div className="flex flex-1 flex-col">
+    <PublicSite>
       <PublicHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16 sm:px-6">
         <h1 className="text-3xl sm:text-4xl">Parent guides</h1>
@@ -27,6 +27,6 @@ export default function GuidesIndex() {
         </ul>
       </main>
       <PublicFooter />
-    </div>
+    </PublicSite>
   );
 }

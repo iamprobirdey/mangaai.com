@@ -28,7 +28,7 @@ export function SignInForm({ next }: { next?: string }) {
   );
 }
 
-export function SignUpForm() {
+export function SignUpForm({ email = "" }: { email?: string }) {
   const [state, action] = useActionState(signUp, undefined);
   useEffect(() => {
     if (state?.ok) track("sign_up", { method: "email" });
@@ -42,7 +42,7 @@ export function SignUpForm() {
       </div>
       <div>
         <label className="label" htmlFor="email">Email</label>
-        <input className="field" id="email" name="email" type="email" autoComplete="email" required />
+        <input className="field" id="email" name="email" type="email" autoComplete="email" defaultValue={email} required />
       </div>
       <div>
         <label className="label" htmlFor="password">Password</label>

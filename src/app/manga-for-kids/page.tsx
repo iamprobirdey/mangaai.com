@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Cover } from "@/components/ui";
 import { JsonLd } from "@/components/json-ld";
-import { PublicFooter, PublicHeader } from "@/components/public-chrome";
+import { PublicFooter, PublicHeader, PublicSite } from "@/components/public-chrome";
 import { publishedSeries } from "@/lib/public-data";
 import { coverUrl } from "@/lib/storage";
 import { AGE_BANDS, AGE_BAND_LABELS } from "@/lib/constants";
@@ -22,7 +22,7 @@ export default async function MangaForKidsHub() {
   const series = await publishedSeries();
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PublicSite>
       <PublicHeader />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 sm:px-6">
         <div className="bubble max-w-3xl">
@@ -84,6 +84,6 @@ export default async function MangaForKidsHub() {
           hasPart: AGE_BANDS.map((b) => ({ "@type": "WebPage", name: AGE_PAGE_COPY[b].title, url: `${siteUrl()}/manga-for-kids/${AGE_SLUGS[b]}` })),
         }}
       />
-    </div>
+    </PublicSite>
   );
 }

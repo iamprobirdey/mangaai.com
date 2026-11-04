@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Cover } from "@/components/ui";
 import { JsonLd } from "@/components/json-ld";
-import { PublicFooter, PublicHeader } from "@/components/public-chrome";
+import { PublicFooter, PublicHeader, PublicSite } from "@/components/public-chrome";
 import { publishedSeries } from "@/lib/public-data";
 import { coverUrl } from "@/lib/storage";
 import { AGE_BANDS, AGE_BAND_LABELS, bandsUpTo } from "@/lib/constants";
@@ -54,7 +54,7 @@ export default async function AgePage({ params }: PageProps<"/manga-for-kids/[ag
   );
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PublicSite>
       <PublicHeader />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 sm:px-6">
         <nav aria-label="Breadcrumb" className="hint">
@@ -101,6 +101,6 @@ export default async function AgePage({ params }: PageProps<"/manga-for-kids/[ag
           itemListElement: exact.map((s, i) => ({ "@type": "ListItem", position: i + 1, url: `${base}/manga/${s.slug}`, name: s.title })),
         }}
       />
-    </div>
+    </PublicSite>
   );
 }

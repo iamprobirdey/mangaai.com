@@ -11,7 +11,7 @@
   leaf     #1E9E6A  success and "free" labels
 */
 
-@theme inline {
+@theme {
   --color-ink: #1c1f4a;
   --color-ink-soft: #4a4e7a;
   --color-paper: #ffffff;
@@ -167,6 +167,70 @@ h3 {
     font-weight: 700;
     background: var(--color-paper);
   }
+}
+
+/*
+  Public site (landing, SEO pages): the "Landing page" design from the design canvas.
+  Black ink, white paper, one yellow accent, Dela Gothic One headlines over Nunito.
+*/
+.site-public {
+  --color-ink: #111111;
+  --color-ink-soft: #444444;
+  --color-paper: #ffffff;
+  --color-tone: #f2f2f2;
+  --color-tone-deep: #dadada;
+  --color-sun: #ffd23f;
+  --font-mochiy: "Dela Gothic One";
+  --font-atkinson: "Nunito";
+  --font-display: "Dela Gothic One", sans-serif;
+  --font-sans: "Nunito", system-ui, sans-serif;
+  background: #ffffff;
+  color: #111111;
+  font-family: "Nunito", system-ui, sans-serif;
+}
+.site-public h1,
+.site-public h2 {
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.site-public h3 {
+  font-family: "Nunito", system-ui, sans-serif;
+  font-weight: 900;
+}
+.site-public .btn {
+  border-radius: 0;
+}
+.site-public .panel {
+  border-radius: 0;
+  border-width: 4px;
+  box-shadow: 8px 8px 0 #111111;
+}
+.site-public .panel-flat,
+.site-public .tag,
+.site-public .bubble {
+  border-radius: 0;
+}
+/* Halftone dots and the radiating "speed lines" burst from the design */
+.mx-tone {
+  background-color: #ffffff;
+  background-image: radial-gradient(#dadada 1.3px, transparent 1.4px);
+  background-size: 10px 10px;
+}
+.mx-burst {
+  background-image: repeating-conic-gradient(from 0deg at 50% 50%, #ffffff 0deg 6deg, #f4f4f4 6deg 12deg);
+}
+.mx-mark {
+  background: var(--color-sun);
+  padding: 0 10px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.site-public summary {
+  cursor: pointer;
+  list-style: none;
+}
+.site-public summary::-webkit-details-marker {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

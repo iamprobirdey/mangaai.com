@@ -1,18 +1,19 @@
-import { Logo, PageShell } from "@/components/ui";
+import { PublicFooter, PublicHeader, PublicSite } from "@/components/public-chrome";
 
 export const metadata = { title: "Privacy policy", alternates: { canonical: "/privacy" } };
 
 // DRAFT — have a lawyer review before launch (COPPA, India DPDP Act, GDPR if you serve the EU/UK).
 export default function PrivacyPage() {
   return (
-    <PageShell>
-      <Logo />
-      <article className="mt-8 max-w-prose space-y-4">
+    <PublicSite>
+      <PublicHeader />
+      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
+      <article className="max-w-prose space-y-4">
         <h1 className="text-3xl">Privacy policy</h1>
         <p className="hint">Draft. This page must be reviewed by a lawyer before launch.</p>
         <h2 className="text-xl">Who the account belongs to</h2>
         <p>MangaAI accounts are created and paid for by a parent or guardian aged 18 or over. Children never sign up themselves.</p>
-        <h2 className="text-xl">What we collect about children</h2>
+        <h2 className="text-xl" id="children">What we collect about children</h2>
         <p>
           For each reader profile we store only a nickname, a preset animal avatar and an age range, plus reading activity: which
           chapters were opened, the last page read, reading time per day, and badges earned. We do not collect a child&apos;s real
@@ -45,6 +46,8 @@ export default function PrivacyPage() {
           reading data. Contact us at hello@mangaai.com for a copy of your data.
         </p>
       </article>
-    </PageShell>
+      </main>
+      <PublicFooter />
+    </PublicSite>
   );
 }

@@ -1,13 +1,14 @@
-import { Logo, PageShell } from "@/components/ui";
+import { PublicFooter, PublicHeader, PublicSite } from "@/components/public-chrome";
 
 export const metadata = { title: "Terms of service", alternates: { canonical: "/terms" } };
 
 // DRAFT — have a lawyer review before launch.
 export default function TermsPage() {
   return (
-    <PageShell>
-      <Logo />
-      <article className="mt-8 max-w-prose space-y-4">
+    <PublicSite>
+      <PublicHeader />
+      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
+      <article className="max-w-prose space-y-4">
         <h1 className="text-3xl">Terms of service</h1>
         <p className="hint">Draft. This page must be reviewed by a lawyer before launch.</p>
         <h2 className="text-xl">The plan</h2>
@@ -30,6 +31,8 @@ export default function TermsPage() {
         <h2 className="text-xl">AI-made stories</h2>
         <p>Our stories are created with the help of AI tools and every page is reviewed by a person before it is published.</p>
       </article>
-    </PageShell>
+      </main>
+      <PublicFooter />
+    </PublicSite>
   );
 }

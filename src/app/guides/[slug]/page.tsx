@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
-import { PublicFooter, PublicHeader } from "@/components/public-chrome";
+import { PublicFooter, PublicHeader, PublicSite } from "@/components/public-chrome";
 import { GUIDES, guideBySlug } from "@/lib/guides";
 import { formatDate } from "@/lib/dates";
 import { SITE_NAME, siteUrl } from "@/lib/site";
@@ -32,7 +32,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
   const others = GUIDES.filter((o) => o.slug !== g.slug);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PublicSite>
       <PublicHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16 sm:px-6">
         <nav aria-label="Breadcrumb" className="hint">
@@ -86,6 +86,6 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
           mainEntityOfPage: `${siteUrl()}/guides/${g.slug}`,
         }}
       />
-    </div>
+    </PublicSite>
   );
 }

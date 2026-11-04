@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Cover } from "@/components/ui";
 import { JsonLd } from "@/components/json-ld";
-import { PublicFooter, PublicHeader } from "@/components/public-chrome";
+import { PublicFooter, PublicHeader, PublicSite } from "@/components/public-chrome";
 import { publicSeriesBySlug, samplePages } from "@/lib/public-data";
 import { coverUrl } from "@/lib/storage";
 import { AGE_BAND_LABELS, DAYS } from "@/lib/constants";
@@ -45,7 +45,7 @@ export default async function PublicSeriesPage({ params }: PageProps<"/manga/[sl
   const cover = coverUrl(series.cover_path);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <PublicSite>
       <PublicHeader />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 sm:px-6">
         <nav aria-label="Breadcrumb" className="hint">
@@ -141,6 +141,6 @@ export default async function PublicSeriesPage({ params }: PageProps<"/manga/[sl
           },
         ]}
       />
-    </div>
+    </PublicSite>
   );
 }
