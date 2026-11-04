@@ -61,7 +61,10 @@ export default async function AdminSeriesDetail({ params }: PageProps<"/admin/se
           {list.map((c) => (
             <li key={c.id}>
               <Link href={`/admin/volumes/${c.id}`} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 hover:bg-tone">
-                <span className="font-bold">{volumeLabel(c)}</span>
+                <span className="flex items-center gap-3">
+                  <Cover src={coverUrl(c.cover_path)} title={volumeLabel(c)} className="w-12 shrink-0" />
+                  <span className="font-bold">{volumeLabel(c)}</span>
+                </span>
                 <span className="flex items-center gap-2 text-sm">
                   <span>{c.page_count} pages</span>
                   <span className="tag">{volumeState(c)}</span>
@@ -89,9 +92,10 @@ export default async function AdminSeriesDetail({ params }: PageProps<"/admin/se
 
       <section className="grid gap-6 lg:grid-cols-[240px_1fr]">
         <div className="panel-flat p-4">
-          <h2 className="text-lg">Cover</h2>
-          <Cover src={coverUrl(series.cover_path)} title={series.title} className="mt-3" />
-          <CoverUploader seriesId={id} />
+          <h2 className="text-lg">Series cover</h2>
+          <p className="hint mt-1">Optional. If empty, the first volume&apos;s cover is used.</p>
+          <Cover src={coverUrl(series.cover_path ?? list.find((c) => c.cover_path)?.cover_path)} title={series.title} className="mt-3" />
+          <CoverUploader seriesId={id} hasCover={!!series.cover_path} />
         </div>
         <div className="panel-flat p-5">
           <h2 className="text-lg">Details</h2>

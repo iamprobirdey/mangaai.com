@@ -30,7 +30,7 @@ export default async function SeriesPage({ params }: PageProps<"/read/series/[sl
   return (
     <div className="grid gap-10 md:grid-cols-[260px_1fr]">
       <div>
-        <Cover src={coverUrl(series.cover_path)} title={series.title} />
+        <Cover src={coverUrl(series.cover_path ?? chapterList.find((c) => c.cover_path)?.cover_path)} title={series.title} />
         <div className="mt-4 flex flex-col gap-2">
           {firstUnread ? (
             <Link href={`/read/volume/${firstUnread.id}`} className="btn btn-primary">
@@ -59,19 +59,20 @@ export default async function SeriesPage({ params }: PageProps<"/read/series/[sl
           <p className="panel-flat mt-6 p-3">You can peek at the first {PREVIEW_PAGES} pages of each book. Ask a grown-up to start the free trial to read them all.</p>
         ) : null}
         <section className="mt-8">
-          <h2 className="sr-only">Volumes</h2>
-          <ul className="divide-y-2 divide-tone-deep rounded-lg border-[3px] border-ink bg-paper">
+          <h2 className="text-xl">{chapterList.length === 1 ? "1 book" : `${chapterList.length} books`}</h2>
+          <ul className="mt-4 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
             {chapterList.map((c) => {
               const p = progressMap.get(c.id);
               return (
                 <li key={c.id}>
-                  <Link href={`/read/volume/${c.id}`} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-tone">
-                    <span className="font-bold">{volumeLabel(c)}</span>
-                    <span className="flex items-center gap-2 text-sm">
+                  <Link href={`/read/volume/${c.id}`} className="block">
+                    <Cover src={coverUrl(c.cover_path ?? series.cover_path)} title={volumeLabel(c)} />
+                    <p className="mt-2 font-bold leading-tight">{volumeLabel(c)}</p>
+                    <p className="mt-1 flex flex-wrap items-center gap-2 text-sm">
                       <span className="hint">{c.page_count} pages</span>
                       {p?.completed_at ? <span className="tag border-leaf text-leaf">Read ✓</span> : p ? <span className="tag">Page {p.last_page}</span> : null}
                       {!access.active ? <span className="tag">Peek</span> : null}
-                    </span>
+                    </p>
                   </Link>
                 </li>
               );

@@ -80,9 +80,21 @@ export async function setSeriesStatus(id: string, status: "draft" | "published" 
 
 export async function setCover(id: string, path: string) {
   await guard();
+  if (!path.startsWith(`${id}/`)) return;
   const supabase = await createClient();
   await supabase.from("series").update({ cover_path: path, updated_at: new Date().toISOString() }).eq("id", id);
   revalidatePath(`/admin/series/${id}`);
+}
+
+export async function setVolumeCover(id: string, path: string) {
+  await guard();
+  if (!path.startsWith(`volumes/${id}/`)) return;
+  const supabase = await createClient();
+  const { data: old } = await supabase.from("chapters").select("cover_path,series_id").eq("id", id).maybeSingle();
+  await supabase.from("chapters").update({ cover_path: path }).eq("id", id);
+  if (old?.cover_path && old.cover_path !== path) await createAdminClient().storage.from("covers").remove([old.cover_path]);
+  revalidatePath(`/admin/volumes/${id}`);
+  if (old?.series_id) revalidatePath(`/admin/series/${old.series_id}`);
 }
 
 /** Adds a volume (one book, one PDF) to a series, then opens it for the PDF upload. */
@@ -180,6 +192,8 @@ export async function deleteVolume(id: string, seriesId: string) {
   const files = (pages ?? []).flatMap((p) => [p.image_path, p.image_path_sm]).filter((p): p is string => !!p);
   if (files.length) await admin.storage.from("pages").remove(files);
   await admin.storage.from("originals").remove([`${id}.pdf`]);
+  const { data: vol } = await admin.from("chapters").select("cover_path").eq("id", id).maybeSingle();
+  if (vol?.cover_path) await admin.storage.from("covers").remove([vol.cover_path]);
   await admin.from("chapters").delete().eq("id", id);
   redirect(`/admin/series/${seriesId}`);
 }

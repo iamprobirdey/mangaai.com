@@ -2,6 +2,7 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AgeBand } from "@/lib/constants";
+import { withVolumeCovers } from "@/lib/content";
 
 /**
  * Data for public (logged-out, indexable) pages. Uses the publishable key without cookies,
@@ -27,7 +28,7 @@ export type PublicSeries = {
   updated_at: string;
 };
 
-export type PublicChapter = { id: string; number: number; title: string | null; page_count: number; publish_at: string };
+export type PublicChapter = { id: string; number: number; title: string | null; cover_path: string | null; page_count: number; publish_at: string };
 
 const SERIES_FIELDS = "id,slug,title,synopsis,cover_path,age_band,genres,reading_direction,is_ai_generated,updated_at";
 
@@ -36,7 +37,7 @@ export async function publishedSeries(): Promise<PublicSeries[]> {
   if (!db) return [];
   try {
     const { data } = await db.from("series").select(SERIES_FIELDS).eq("status", "published").order("title");
-    return (data ?? []) as PublicSeries[];
+    return withVolumeCovers(db, (data ?? []) as PublicSeries[]);
   } catch {
     return [];
   }
@@ -49,10 +50,12 @@ export async function publicSeriesBySlug(slug: string) {
   if (!series) return null;
   const { data: chapters } = await db
     .from("chapters")
-    .select("id,number,title,page_count,publish_at")
+    .select("id,number,title,cover_path,page_count,publish_at")
     .eq("series_id", series.id)
     .order("number");
-  return { series: series as PublicSeries, chapters: (chapters ?? []) as PublicChapter[] };
+  const list = (chapters ?? []) as PublicChapter[];
+  const s = series as PublicSeries;
+  return { series: { ...s, cover_path: s.cover_path ?? list.find((c) => c.cover_path)?.cover_path ?? null }, chapters: list };
 }
 
 /** First few pages of the series' first volume (the same pages anyone can peek at), as short-lived signed URLs. */

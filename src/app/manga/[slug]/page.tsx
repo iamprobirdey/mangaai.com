@@ -94,11 +94,12 @@ export default async function PublicSeriesPage({ params }: PageProps<"/manga/[sl
             <section className="mt-10">
               <h2 className="text-xl">Volumes</h2>
               {chapters.length ? (
-                <ul className="mt-3 divide-y-2 divide-tone-deep rounded-lg border-[3px] border-ink bg-paper">
+                <ul className="mt-4 grid grid-cols-2 gap-5 sm:grid-cols-3">
                   {chapters.map((c) => (
-                    <li key={c.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                      <span className="font-bold">{volumeLabel(c)}</span>
-                      <span className="hint">{c.page_count} pages</span>
+                    <li key={c.id}>
+                      <Cover src={coverUrl(c.cover_path ?? series.cover_path)} title={volumeLabel(c)} alt={`${series.title}, ${volumeLabel(c)} cover`} />
+                      <p className="mt-2 font-bold leading-tight">{volumeLabel(c)}</p>
+                      <p className="hint">{c.page_count} pages</p>
                     </li>
                   ))}
                 </ul>
@@ -128,6 +129,7 @@ export default async function PublicSeriesPage({ params }: PageProps<"/manga/[sl
             hasPart: chapters.slice(0, 50).map((c) => ({
               "@type": "Book",
               name: volumeLabel(c),
+              image: coverUrl(c.cover_path) ?? undefined,
               bookEdition: `Volume ${Number(c.number)}`,
               numberOfPages: c.page_count,
               datePublished: c.publish_at,

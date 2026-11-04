@@ -25,6 +25,7 @@ export type Chapter = {
   series_id: string;
   number: number;
   title: string | null;
+  cover_path: string | null;
   status: "draft" | "in_review" | "approved";
   publish_at: string | null;
   page_count: number;
@@ -40,6 +41,30 @@ export async function hiddenSeriesIds(childId: string) {
   return new Set((data ?? []).map((r) => r.series_id as string));
 }
 
+/**
+ * Series without their own cover borrow the cover of their first volume that has one.
+ * `supabase` must be able to read the volumes (RLS limits readers to live ones).
+ */
+export async function withVolumeCovers<T extends { id: string; cover_path: string | null }>(
+  supabase: { from: (t: "chapters") => any }, // eslint-disable-line @typescript-eslint/no-explicit-any
+  list: T[],
+): Promise<T[]> {
+  const missing = list.filter((s) => !s.cover_path).map((s) => s.id);
+  if (!missing.length) return list;
+  const { data } = await supabase
+    .from("chapters")
+    .select("series_id,number,cover_path")
+    .in("series_id", missing)
+    .eq("status", "approved")
+    .not("cover_path", "is", null)
+    .order("number");
+  const first = new Map<string, string>();
+  for (const r of (data ?? []) as { series_id: string; cover_path: string }[]) {
+    if (!first.has(r.series_id)) first.set(r.series_id, r.cover_path);
+  }
+  return list.map((s) => (s.cover_path ? s : { ...s, cover_path: first.get(s.id) ?? null }));
+}
+
 /** Published series this child is allowed to see (age band and parent's hidden list). */
 export async function seriesForChild(child: Child): Promise<Series[]> {
   const supabase = await createClient();
@@ -52,7 +77,7 @@ export async function seriesForChild(child: Child): Promise<Series[]> {
       .order("title"),
     hiddenSeriesIds(child.id),
   ]);
-  return ((data ?? []) as Series[]).filter((s) => !hidden.has(s.id));
+  return withVolumeCovers(supabase, ((data ?? []) as Series[]).filter((s) => !hidden.has(s.id)));
 }
 
 export function childCanSee(child: Child, series: Series, hidden: Set<string>) {

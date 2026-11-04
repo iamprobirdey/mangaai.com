@@ -4,9 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { volumeLabel, type Chapter, type Series } from "@/lib/content";
 import { formatDate } from "@/lib/dates";
-import { Notice } from "@/components/ui";
+import { Cover, Notice } from "@/components/ui";
+import { coverUrl } from "@/lib/storage";
 import { ActionForm } from "../../forms";
-import { VolumeUploader } from "../../uploaders";
+import { CoverUploader, VolumeUploader } from "../../uploaders";
 import { ApproveForm } from "./approve-form";
 import { deleteVolume, unpublishVolume, updateVolumeDetails } from "../../actions";
 
@@ -34,6 +35,18 @@ export default async function AdminVolumePage({ params }: PageProps<"/admin/volu
 
       {live ? <Notice tone="success">Live for readers since {formatDate(chapter.publish_at)}.</Notice> : null}
       {series.status !== "published" ? <Notice>This series is still a draft, so readers can&apos;t see any volumes yet.</Notice> : null}
+
+      <section className="panel-flat grid gap-5 p-5 sm:grid-cols-[180px_1fr]">
+        <div>
+          <Cover src={coverUrl(chapter.cover_path)} title={volumeLabel(chapter)} />
+          <CoverUploader volumeId={id} hasCover={!!chapter.cover_path} />
+        </div>
+        <div>
+          <h2 className="text-xl">Volume cover</h2>
+          <p className="mt-1">Shown on this book everywhere kids and parents see it. JPG, PNG or WebP, up to 5 MB; a 3:4 portrait image works best.</p>
+          {series.cover_path ? null : <p className="hint mt-2">The series has no cover of its own, so it uses the first volume&apos;s cover.</p>}
+        </div>
+      </section>
 
       <section className="panel p-5">
         <h2 className="text-xl">1. Book PDF</h2>

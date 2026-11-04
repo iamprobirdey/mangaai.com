@@ -10,7 +10,7 @@ import { requestTime } from "@/lib/dates";
 
 export const metadata = { title: "Read" };
 
-type LiveChapter = Pick<Chapter, "id" | "series_id" | "number" | "title" | "publish_at" | "page_count">;
+type LiveChapter = Pick<Chapter, "id" | "series_id" | "number" | "title" | "cover_path" | "publish_at" | "page_count">;
 type ProgressRow = { chapter_id: string; series_id: string; last_page: number; completed_at: string | null; updated_at: string };
 
 export default async function KidHome({ searchParams }: PageProps<"/read">) {
@@ -24,7 +24,7 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
 
   const [{ data: chapterRows }, { data: progressRows }, { data: shelfRows }] = await Promise.all([
     seriesIds.length
-      ? supabase.from("chapters").select("id,series_id,number,title,publish_at,page_count").in("series_id", seriesIds).eq("status", "approved").lte("publish_at", liveCutoff()).order("number")
+      ? supabase.from("chapters").select("id,series_id,number,title,cover_path,publish_at,page_count").in("series_id", seriesIds).eq("status", "approved").lte("publish_at", liveCutoff()).order("number")
       : Promise.resolve({ data: [] }),
     supabase.from("reading_progress").select("chapter_id,series_id,last_page,completed_at,updated_at").eq("child_id", child.id).order("updated_at", { ascending: false }).limit(50),
     supabase.from("shelf").select("series_id").eq("child_id", child.id).order("created_at", { ascending: false }),
@@ -95,7 +95,7 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
                 {continueCards.map(({ series: s, chapter, page }) => (
                   <li key={s.id}>
                     <Link href={`/read/volume/${chapter.id}`} className="panel flex gap-4 p-3 hover:-translate-y-0.5">
-                      <Cover src={coverUrl(s.cover_path)} title={s.title} className="w-20 shrink-0" />
+                      <Cover src={coverUrl(chapter.cover_path ?? s.cover_path)} title={s.title} className="w-20 shrink-0" />
                       <div className="flex flex-col justify-center">
                         <span className="font-display">{s.title}</span>
                         <span>{volumeLabel(chapter)}</span>
@@ -119,7 +119,7 @@ export default async function KidHome({ searchParams }: PageProps<"/read">) {
                   return (
                     <li key={c.id}>
                       <Link href={`/read/volume/${c.id}`} className="block">
-                        <Cover src={coverUrl(s.cover_path)} title={s.title} />
+                        <Cover src={coverUrl(c.cover_path ?? s.cover_path)} title={volumeLabel(c)} />
                         <p className="mt-2 font-bold">{s.title}</p>
                         <p className="hint">{volumeLabel(c)}</p>
                       </Link>

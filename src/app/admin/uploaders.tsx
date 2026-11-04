@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { savePages, setCover } from "./actions";
+import { savePages, setCover, setVolumeCover } from "./actions";
 
 const PAGE_WIDTH = 1400; // px; tablets and desktops
 const PAGE_WIDTH_SM = 800; // px; phones — roughly a third of the bytes
@@ -14,17 +14,23 @@ function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number) 
   );
 }
 
-export function CoverUploader({ seriesId }: { seriesId: string }) {
+const MAX_COVER_BYTES = 5 * 1024 * 1024;
+
+/** Uploads a cover image for a series or for one volume. */
+export function CoverUploader({ seriesId, volumeId, hasCover }: { seriesId?: string; volumeId?: string; hasCover?: boolean }) {
   const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
 
   async function onFile(file: File) {
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) return setStatus("Use a JPG, PNG or WebP image.");
+    if (file.size > MAX_COVER_BYTES) return setStatus("That image is over 5 MB. Try a smaller one.");
     setStatus("Uploading…");
     const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-    const path = `${seriesId}/${Date.now()}.${ext}`;
+    const path = volumeId ? `volumes/${volumeId}/${Date.now()}.${ext}` : `${seriesId}/${Date.now()}.${ext}`;
     const { error } = await createClient().storage.from("covers").upload(path, file, { contentType: file.type, upsert: true });
     if (error) return setStatus(`Upload failed: ${error.message}`);
-    await setCover(seriesId, path);
+    if (volumeId) await setVolumeCover(volumeId, path);
+    else if (seriesId) await setCover(seriesId, path);
     setStatus("Cover updated.");
     router.refresh();
   }
@@ -32,7 +38,7 @@ export function CoverUploader({ seriesId }: { seriesId: string }) {
   return (
     <div className="mt-3">
       <label className="btn w-full cursor-pointer">
-        Upload cover
+        {hasCover ? "Replace cover" : "Upload cover"}
         <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
       </label>
       {status ? <p className="hint mt-2" role="status">{status}</p> : null}
