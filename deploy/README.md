@@ -176,7 +176,8 @@ crontab /srv/mangaai/repo/deploy/crontab
 crontab -l
 ```
 
-- Weekly report: Sundays 19:00 IST. Trial reminders: daily 10:00 IST.
+- Weekly report: Sundays 19:00 IST. Trial reminders: daily 10:00 IST. Privacy housekeeping
+  (retention purge + consent confirmations): daily 03:00 IST.
 - Run one by hand to check: `/srv/mangaai/repo/deploy/cron.sh trial-reminders`
 - The cron URLs are blocked in Nginx; `cron.sh` calls the app on `127.0.0.1` with `CRON_SECRET`.
 

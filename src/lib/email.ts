@@ -4,6 +4,7 @@ import { avatarEmoji } from "@/lib/constants";
 import { BADGES, type BadgeKey } from "@/lib/badges";
 import { formatMinutes } from "@/lib/dates";
 import type { ChildWeek } from "@/lib/family-stats";
+import { OPERATOR } from "@/lib/site";
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
@@ -33,6 +34,66 @@ const shell = (body: string) => `<!doctype html><html><body style="margin:0;back
       <p style="font-size:20px;font-weight:bold;margin:0">MangaAI</p>
       ${body}
     </div></body></html>`;
+
+const button = (href: string, label: string) =>
+  `<p><a href="${href}" style="display:inline-block;background:#ffc83d;color:#1c1f4a;border:3px solid #1c1f4a;border-radius:999px;padding:10px 18px;font-weight:bold;text-decoration:none">${label}</a></p>`;
+
+/**
+ * Direct notice to the parent when they create the first reader profile (COPPA 312.4(c), DPDP
+ * Rule 3). Says exactly what is collected about the child, why, who processes it, and how to undo it.
+ */
+export function parentNoticeEmail(parentName: string | null, childNickname: string) {
+  const site = publicEnv.siteUrl();
+  const greeting = parentName ? `Hi ${esc(parentName)},` : "Hi,";
+  const nick = esc(childNickname);
+  const html = shell(`
+      <p>${greeting}</p>
+      <p>You've just created a reader profile for <strong>${nick}</strong> on MangaAI. Because ${nick} is a child, here is exactly what we keep and why.</p>
+      <p style="font-weight:bold;margin-bottom:4px">What we store about ${nick}</p>
+      <ul style="margin-top:0">
+        <li>The nickname, animal avatar and age range you chose</li>
+        <li>Reading activity: which books were opened, the last page, minutes read per day, badges and their shelf</li>
+      </ul>
+      <p>We never ask for a child's real name, photo, birthday, email, location or voice. There's no chat, no ads and no in-app purchases.</p>
+      <p style="font-weight:bold;margin-bottom:4px">How we use it</p>
+      <p style="margin-top:0">Only to run MangaAI for your family: show the right books for ${nick}'s age, remember the page, apply the limits you set, award badges, and send you the weekly reading report. We don't sell it, share it for advertising, or use it to profile ${nick}. Our hosting, database and email providers process it on our behalf under contract.</p>
+      <p style="font-weight:bold;margin-bottom:4px">You're in control</p>
+      <p style="margin-top:0">You can edit or delete ${nick}'s profile, download your family's data, or delete the whole account any time in the grown-ups area. Deleting removes the reading history straight away.</p>
+      ${button(`${site}/privacy#children`, "Read the full privacy notice")}
+      <p>If you didn't create this profile, or you don't agree, reply to this email or write to ${OPERATOR.privacyEmail} and we'll delete it.</p>`);
+  const text = `${greeting}
+
+You've just created a reader profile for ${childNickname} on MangaAI. Here is what we keep and why.
+
+What we store about ${childNickname}: the nickname, animal avatar and age range you chose, and reading activity (books opened, last page, minutes per day, badges, shelf). We never ask for a child's real name, photo, birthday, email, location or voice. No chat, no ads, no in-app purchases.
+
+How we use it: only to run MangaAI for your family (age-right books, remembering the page, your limits, badges, your weekly report). We don't sell it, share it for advertising, or profile your child. Our hosting, database and email providers process it on our behalf.
+
+You're in control: edit or delete the profile, download your data, or delete the account any time in the grown-ups area.
+
+Full notice: ${site}/privacy#children
+Didn't create this profile or don't agree? Reply or write to ${OPERATOR.privacyEmail} and we'll delete it.`;
+  return { subject: `About ${childNickname}'s reader profile on MangaAI`, html, text };
+}
+
+/** The "plus" in email-plus consent: a later confirmation the parent can act on (COPPA 312.5(b)(2)(vi)). */
+export function parentConsentConfirmEmail(parentName: string | null, consentDate: string) {
+  const site = publicEnv.siteUrl();
+  const greeting = parentName ? `Hi ${esc(parentName)},` : "Hi,";
+  const html = shell(`
+      <p>${greeting}</p>
+      <p>A quick confirmation: on <strong>${esc(consentDate)}</strong> you agreed that MangaAI may keep reader profiles and reading activity for your children, as described in our privacy notice.</p>
+      <p>You can change your mind any time. Delete a reader profile or the whole account in the grown-ups area and their data is erased.</p>
+      ${button(`${site}/parent/readers`, "Manage reader profiles")}
+      <p>If this wasn't you, reply to this email or write to ${OPERATOR.privacyEmail} and we'll delete the account.</p>`);
+  const text = `${greeting}
+
+A quick confirmation: on ${consentDate} you agreed that MangaAI may keep reader profiles and reading activity for your children, as described in our privacy notice (${site}/privacy#children).
+
+Change your mind any time: delete a reader profile or the whole account in the grown-ups area (${site}/parent/readers).
+If this wasn't you, reply or write to ${OPERATOR.privacyEmail} and we'll delete the account.`;
+  return { subject: "Confirming your consent for your children's reader profiles", html, text };
+}
 
 export function trialEndingEmail(parentName: string | null, opts: { chargeDate: string; price: string; plan: string }) {
   const site = publicEnv.siteUrl();

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { publicEnv } from "@/lib/env";
+import { PRIVACY_VERSION } from "@/lib/site";
 import type { FormState } from "@/components/forms";
 
 const safeNext = (value: FormDataEntryValue | null, fallback = "/profiles") => {
@@ -24,7 +25,8 @@ const signUpSchema = z.object({
   email: z.string().trim().email("Enter a valid email address."),
   password: z.string().min(8, "Use at least 8 characters for your password."),
   displayName: z.string().trim().max(60).optional(),
-  consent: z.literal("on", { message: "Confirm you're a parent or guardian and agree to the terms." }),
+  consent: z.literal("on", { message: "Confirm you're a parent or guardian aged 18 or over and agree to the terms." }),
+  childConsent: z.literal("on", { message: "Tick the box to let us keep reader profiles for your children." }),
 });
 
 export async function signUp(_: FormState, formData: FormData): Promise<FormState> {
@@ -33,6 +35,7 @@ export async function signUp(_: FormState, formData: FormData): Promise<FormStat
     password: formData.get("password"),
     displayName: formData.get("displayName") || undefined,
     consent: formData.get("consent"),
+    childConsent: formData.get("childConsent"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -41,7 +44,8 @@ export async function signUp(_: FormState, formData: FormData): Promise<FormStat
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
-      data: { display_name: parsed.data.displayName ?? "", consent: "true" },
+      // consent_at is stamped by the handle_new_user trigger; the version says which notice was agreed to.
+      data: { display_name: parsed.data.displayName ?? "", consent: "true", privacy_version: PRIVACY_VERSION },
       emailRedirectTo: `${publicEnv.siteUrl()}/auth/callback?next=/setup`,
     },
   });

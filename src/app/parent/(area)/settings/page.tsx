@@ -21,6 +21,14 @@ export default async function SettingsPage() {
         <h2 className="text-xl">Grown-ups PIN</h2>
         <PinForm />
       </section>
+      <section className="panel p-5">
+        <h2 className="text-xl">Your data</h2>
+        <p className="mt-1">
+          Download everything MangaAI keeps about your family (your account, each reader profile and their reading history) as a
+          file. See the <a className="underline" href="/privacy">privacy policy</a> for what we keep and for how long.
+        </p>
+        <a href="/parent/export" className="btn mt-4" download>Download my data</a>
+      </section>
       <section className="panel-flat border-alert p-5">
         <h2 className="text-xl">Delete account</h2>
         <p className="mt-1">

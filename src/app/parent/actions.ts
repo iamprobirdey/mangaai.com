@@ -16,6 +16,7 @@ import {
 } from "@/lib/dal";
 import { AGE_BANDS, AVATARS } from "@/lib/constants";
 import type { FormState } from "@/components/forms";
+import { sendParentNotice } from "@/lib/consent";
 
 const MAX_PIN_ATTEMPTS = 5;
 const PIN_LOCK_MINUTES = 15;
@@ -68,6 +69,7 @@ export async function completeSetup(_: FormState, formData: FormData): Promise<F
     .single();
   if (error || !data) return { error: "Couldn't create the reader profile. Try again." };
 
+  await sendParentNotice(user.id, data.id, child.data.nickname);
   await setActiveChild(user.id, data.id);
   redirect("/read");
 }
@@ -141,8 +143,9 @@ export async function createChild(_: FormState, formData: FormData): Promise<For
   const child = readChild(formData);
   if (!child.success) return { error: child.error.issues[0].message };
   const supabase = await createClient();
-  const { error } = await supabase.from("children").insert({ ...child.data, parent_id: user.id });
-  if (error) return { error: error.message.includes("at most 5") ? "A family can have up to 5 readers." : "Couldn't add the reader." };
+  const { data: created, error } = await supabase.from("children").insert({ ...child.data, parent_id: user.id }).select("id").single();
+  if (error || !created) return { error: error?.message.includes("at most 5") ? "A family can have up to 5 readers." : "Couldn't add the reader." };
+  await sendParentNotice(user.id, created.id, child.data.nickname);
   revalidatePath("/parent", "layout");
   return { ok: `${child.data.nickname} is ready to read.` };
 }
@@ -221,6 +224,9 @@ export async function deleteAccount(_: FormState, formData: FormData): Promise<F
       }
     }
   }
+  // Stored Razorpay notifications can hold the parent's email/phone and don't cascade; erase them.
+  const { data: allSubs } = await admin.from("subscriptions").select("razorpay_subscription_id").eq("parent_id", user.id);
+  await admin.rpc("forget_billing_events", { p_subscription_ids: (allSubs ?? []).map((s) => s.razorpay_subscription_id) });
   // Deleting the auth user cascades to the profile, reader profiles and all reading data.
   const { error } = await admin.auth.admin.deleteUser(user.id);
   if (error) return { error: "Couldn't delete the account. Try again." };

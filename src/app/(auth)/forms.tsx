@@ -52,10 +52,21 @@ export function SignUpForm({ email = "" }: { email?: string }) {
       <label className="flex items-start gap-3 text-sm">
         <input type="checkbox" name="consent" className="mt-1 h-5 w-5 accent-ink" required />
         <span>
-          I&apos;m a parent or guardian aged 18 or over, and I agree to the <Link className="underline" href="/terms">terms</Link> and{" "}
-          <Link className="underline" href="/privacy">privacy policy</Link>, including creating reader profiles for my children.
+          I&apos;m a parent or legal guardian aged 18 or over, and I agree to the <Link className="underline" href="/terms">terms</Link>.
         </span>
       </label>
+      <div className="rounded-lg border-2 border-ink bg-tone p-3 text-sm">
+        <p className="font-bold">About your children&apos;s data</p>
+        <p className="mt-1">
+          For each child you add, MangaAI keeps only a nickname, an animal avatar, an age range and their reading activity (books,
+          pages, minutes, badges). It&apos;s used only to run the service for your family and send you the weekly report. No ads,
+          no chat, never sold. You can delete it any time. <Link className="underline" href="/privacy#children">Full privacy notice</Link>
+        </p>
+        <label className="mt-3 flex items-start gap-3">
+          <input type="checkbox" name="childConsent" className="mt-1 h-5 w-5 accent-ink" required />
+          <span>As their parent or guardian, I consent to MangaAI processing my children&apos;s data as described above.</span>
+        </label>
+      </div>
       <FormMessage state={state} />
       <SubmitButton className="btn btn-primary w-full" pending="Creating account…">Create account</SubmitButton>
       <p className="text-sm">

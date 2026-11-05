@@ -2,6 +2,20 @@ import { AGE_BANDS, type AgeBand } from "@/lib/constants";
 
 export const SITE_NAME = "MangaAI";
 
+/** Who runs the service and how to reach them (privacy policy, terms, emails). */
+export const OPERATOR = {
+  name: "Probir Dey",
+  tradingAs: "MangaAI",
+  city: "Bengaluru, Karnataka, India",
+  email: "hello@mangaai.com",
+  /** Grievance Officer under the DPDP Act; answers privacy requests and complaints. */
+  grievanceOfficer: "Probir Dey",
+  privacyEmail: "privacy@mangaai.com",
+} as const;
+
+/** Bump when the privacy notice changes in a way parents must see; stored with each consent. */
+export const PRIVACY_VERSION = "2026-11-05";
+
 export function siteUrl() {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 }

@@ -9,3 +9,6 @@ PATH=/usr/local/bin:/usr/bin:/bin
 
 # "Your trial ends in 2 days" reminders: every day 10:00 IST.
 30 4 * * *    /srv/mangaai/repo/deploy/cron.sh trial-reminders >> /srv/mangaai/logs/cron.log 2>&1
+
+# Privacy housekeeping (retention purge + parental-consent confirmations): every day 03:00 IST.
+30 21 * * *   /srv/mangaai/repo/deploy/cron.sh daily-maintenance >> /srv/mangaai/logs/cron.log 2>&1
