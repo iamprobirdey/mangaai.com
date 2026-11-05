@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
       { source: "/:path*", headers: security },
       {
         // The reader never caches signed page URLs in shared caches.
-        source: "/read/chapter/:id*",
+        source: "/read/volume/:id*",
         headers: [{ key: "Cache-Control", value: "private, no-store" }],
       },
     ];

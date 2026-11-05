@@ -114,7 +114,7 @@ The migrations create the tables, row-level security (helpers live in a non-expo
 3. Set the plan IDs and amounts (in the smallest currency unit) in your environment.
 
 **Country-based pricing.** Visitors in India see and pay rupees. Everyone else sees dollars, provided USD plans are set.
-The country comes from the hosting platform's geo header (`x-vercel-ip-country` on Vercel, `cf-ipcountry` on Cloudflare).
+The country comes from Cloudflare's `cf-ipcountry` header when the site is behind Cloudflare (see `deploy/README.md`); without it everyone gets INR.
 Locally, set `PRICING_REGION=IN` or `INTL` to test either one.
 
 - **INR test plans (already created):** ₹749/month `plan_TvyYMAHfvVDIma`, ₹5,749/year `plan_TvyZKEnPjczZI7`.
@@ -128,9 +128,10 @@ npm install                  # also copies the pdf.js worker into /public
 npm run dev
 ```
 
-### 5. Deploy (Vercel)
-Import the repo, add every variable from `.env.example`, and deploy. Vercel picks up both scheduled jobs from `vercel.json`
-(the weekly summary and the daily trial reminders) and sends `CRON_SECRET` with each call.
+### 5. Deploy (DigitalOcean droplet)
+See [`deploy/README.md`](deploy/README.md): Nginx + PM2 on one droplet, zero-downtime releases with
+`deploy/update.sh` (and `--rollback`), and a crontab that calls the weekly summary and daily trial
+reminders with `CRON_SECRET`.
 
 ## Scripts
 | Command | What it does |

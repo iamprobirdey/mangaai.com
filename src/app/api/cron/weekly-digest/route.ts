@@ -7,7 +7,7 @@ import { sendEmail, weeklyDigestEmail } from "@/lib/email";
 export const maxDuration = 300;
 
 /**
- * Weekly parent email. Vercel Cron calls this every Sunday (see vercel.json) with
+ * Weekly parent email. The droplet's crontab calls this every Sunday (see deploy/crontab) with
  * `Authorization: Bearer $CRON_SECRET`. Safe to re-run: families emailed in the last 6 days are skipped.
  */
 export async function GET(request: NextRequest) {

@@ -1,0 +1,11 @@
+# MangaAI scheduled jobs. Install as the app user:   crontab /srv/mangaai/repo/deploy/crontab
+# Times are UTC (DigitalOcean droplets run in UTC, and Ubuntu's cron ignores CRON_TZ).
+# India is UTC+5:30, so 13:30 UTC = 19:00 IST and 04:30 UTC = 10:00 IST.
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+
+# Weekly reading report to parents: Sundays 19:00 IST.
+30 13 * * 0   /srv/mangaai/repo/deploy/cron.sh weekly-digest   >> /srv/mangaai/logs/cron.log 2>&1
+
+# "Your trial ends in 2 days" reminders: every day 10:00 IST.
+30 4 * * *    /srv/mangaai/repo/deploy/cron.sh trial-reminders >> /srv/mangaai/logs/cron.log 2>&1
