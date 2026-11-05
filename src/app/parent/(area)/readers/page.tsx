@@ -4,6 +4,7 @@ import { avatarEmoji, bandsUpTo } from "@/lib/constants";
 import type { Series } from "@/lib/content";
 import { AddReaderForm, EditReaderForm } from "./reader-forms";
 import { deleteChild } from "../../actions";
+import { ConfirmSubmit } from "@/components/confirm-submit";
 
 export const metadata = { title: "Readers" };
 
@@ -44,7 +45,11 @@ export default async function ReadersPage() {
             <EditReaderForm child={c} series={allowed} hiddenIds={hiddenIds} />
             <form action={deleteChild} className="mt-4 border-t-2 border-tone-deep pt-4">
               <input type="hidden" name="id" value={c.id} />
-              <button type="submit" className="btn btn-danger">Delete {c.nickname}&apos;s profile and reading history</button>
+              <ConfirmSubmit
+                label={`Delete ${c.nickname}'s profile and reading history`}
+                warning={`Delete ${c.nickname} for good? Their reading history, streak, badges and shelf are removed. This can't be undone.`}
+                confirmLabel={`Yes, delete ${c.nickname}`}
+              />
             </form>
           </section>
         );

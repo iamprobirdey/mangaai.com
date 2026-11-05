@@ -58,7 +58,7 @@ export async function awardBadges(childId: string, seriesId: string | null): Pro
   );
 
   const earned = earnedBadges({
-    chaptersCompleted: done.length,
+    booksCompleted: done.length,
     streak: computeStreak((days ?? []).map((d) => d.day), today),
     finishedSeries,
     genresCompleted: genres.size,

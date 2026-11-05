@@ -8,6 +8,7 @@ import { Cover, Notice } from "@/components/ui";
 import { coverUrl } from "@/lib/storage";
 import { ActionForm } from "../../forms";
 import { CoverUploader, VolumeUploader } from "../../uploaders";
+import { ConfirmSubmit } from "@/components/confirm-submit";
 import { ApproveForm } from "./approve-form";
 import { deleteVolume, unpublishVolume, updateVolumeDetails } from "../../actions";
 
@@ -96,7 +97,11 @@ export default async function AdminVolumePage({ params }: PageProps<"/admin/volu
           </div>
         </ActionForm>
         <form action={deleteVolume.bind(null, id, series.id)} className="mt-6 border-t-2 border-tone-deep pt-4">
-          <button type="submit" className="btn btn-danger">Delete this volume and its pages</button>
+          <ConfirmSubmit
+            label="Delete this volume and its pages"
+            warning={`Delete ${volumeLabel(chapter)} for good? Its PDF, pages and cover are removed, and every child's progress on it is lost. This can't be undone.`}
+            confirmLabel="Yes, delete this volume"
+          />
         </form>
       </section>
     </div>

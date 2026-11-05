@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAccess, getChildren, getProfile } from "@/lib/dal";
 import { weeklyStats } from "@/lib/family-stats";
-import { avatarEmoji } from "@/lib/constants";
+import { AGE_BAND_LABELS, avatarEmoji, bandsUpTo, type AgeBand } from "@/lib/constants";
 import { BADGES, type BadgeKey } from "@/lib/badges";
 import { formatDate, formatMinutes } from "@/lib/dates";
 import { Notice } from "@/components/ui";
@@ -14,7 +14,18 @@ const MAX_READERS = 5;
 export default async function ParentOverview() {
   const [profile, children] = await Promise.all([getProfile(), getChildren()]);
   const access = await getAccess(profile.id);
-  const stats = await weeklyStats(await createClient(), children.map((c) => c.id));
+  const supabase = await createClient();
+  const [stats, { data: liveSeries }, { data: hiddenRows }] = await Promise.all([
+    weeklyStats(supabase, children.map((c) => c.id)),
+    // Published series that have at least one live book (RLS only returns live volumes to parents).
+    supabase.from("series").select("id,age_band,chapters!inner(id)").eq("status", "published").eq("chapters.status", "approved"),
+    supabase.from("child_hidden_series").select("child_id,series_id").in("child_id", children.map((c) => c.id)),
+  ]);
+  const series = (liveSeries ?? []) as { id: string; age_band: AgeBand }[];
+  const hidden = new Set((hiddenRows ?? []).map((h) => `${h.child_id}:${h.series_id}`));
+  /** How many series this reader can actually open right now. */
+  const booksFor = (childId: string, band: AgeBand) =>
+    series.filter((s) => bandsUpTo(band).includes(s.age_band) && !hidden.has(`${childId}:${s.id}`)).length;
 
   return (
     <div className="space-y-8">
@@ -59,6 +70,13 @@ export default async function ParentOverview() {
                   </p>
                 </div>
               </div>
+              {booksFor(c.id, c.age_band) === 0 ? (
+                <p className="mt-3 rounded-lg border-2 border-sun bg-sun/20 p-3 text-sm">
+                  {c.nickname}&apos;s library is empty: there are no books for {AGE_BAND_LABELS[c.age_band].toLowerCase()}{" "}
+                  {[...hidden].some((k) => k.startsWith(`${c.id}:`)) ? "that you haven't hidden " : ""}yet. New books are being
+                  added. If the age range is wrong, <Link className="underline" href="/parent/readers">change it in Readers</Link>.
+                </p>
+              ) : null}
               <dl className="mt-5 grid grid-cols-3 gap-3 text-center">
                 <div className="rounded-lg bg-tone p-3">
                   <dt className="hint">Reading time</dt>

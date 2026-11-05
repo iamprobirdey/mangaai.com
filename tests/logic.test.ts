@@ -52,10 +52,10 @@ test("access: cancelled keeps access until the period ends", () => {
 });
 
 test("badges", () => {
-  assert.deepEqual(earnedBadges({ chaptersCompleted: 0, streak: 0, finishedSeries: false, genresCompleted: 0 }), []);
+  assert.deepEqual(earnedBadges({ booksCompleted: 0, streak: 0, finishedSeries: false, genresCompleted: 0 }), []);
   assert.deepEqual(
-    earnedBadges({ chaptersCompleted: 5, streak: 7, finishedSeries: true, genresCompleted: 3 }).sort(),
-    ["chapters_5", "explorer", "first_chapter", "series_finisher", "streak_3", "streak_7"].sort(),
+    earnedBadges({ booksCompleted: 3, streak: 7, finishedSeries: true, genresCompleted: 3 }).sort(),
+    ["books_3", "explorer", "first_book", "series_finisher", "streak_3", "streak_7"].sort(),
   );
 });
 

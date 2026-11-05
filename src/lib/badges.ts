@@ -1,8 +1,8 @@
 export type BadgeKey =
-  | "first_chapter"
-  | "chapters_5"
-  | "chapters_25"
-  | "chapters_100"
+  | "first_book"
+  | "books_3"
+  | "books_10"
+  | "books_25"
   | "streak_3"
   | "streak_7"
   | "streak_30"
@@ -10,10 +10,10 @@ export type BadgeKey =
   | "explorer";
 
 export const BADGES: Record<BadgeKey, { icon: string; name: string; how: string }> = {
-  first_chapter: { icon: "🌱", name: "First book", how: "Finish your first book" },
-  chapters_5: { icon: "📚", name: "Page turner", how: "Finish 5 books" },
-  chapters_25: { icon: "🦉", name: "Bookworm", how: "Finish 25 books" },
-  chapters_100: { icon: "🏆", name: "Manga master", how: "Finish 100 books" },
+  first_book: { icon: "🌱", name: "First book", how: "Finish your first book" },
+  books_3: { icon: "📚", name: "Page turner", how: "Finish 3 books" },
+  books_10: { icon: "🦉", name: "Bookworm", how: "Finish 10 books" },
+  books_25: { icon: "🏆", name: "Manga master", how: "Finish 25 books" },
   streak_3: { icon: "🔥", name: "Warming up", how: "Reach a 3-day reading streak" },
   streak_7: { icon: "🌟", name: "Week of stories", how: "Reach a 7-day reading streak" },
   streak_30: { icon: "🚀", name: "Unstoppable", how: "Reach a 30-day reading streak" },
@@ -24,16 +24,17 @@ export const BADGES: Record<BadgeKey, { icon: string; name: string; how: string 
 export const BADGE_ORDER = Object.keys(BADGES) as BadgeKey[];
 
 export function earnedBadges(stats: {
-  chaptersCompleted: number;
+  booksCompleted: number;
   streak: number;
   finishedSeries: boolean;
   genresCompleted: number;
 }): BadgeKey[] {
   const out: BadgeKey[] = [];
-  if (stats.chaptersCompleted >= 1) out.push("first_chapter");
-  if (stats.chaptersCompleted >= 5) out.push("chapters_5");
-  if (stats.chaptersCompleted >= 25) out.push("chapters_25");
-  if (stats.chaptersCompleted >= 100) out.push("chapters_100");
+  // Targets are whole books (one volume = one PDF), so they're lower than chapter-based ones.
+  if (stats.booksCompleted >= 1) out.push("first_book");
+  if (stats.booksCompleted >= 3) out.push("books_3");
+  if (stats.booksCompleted >= 10) out.push("books_10");
+  if (stats.booksCompleted >= 25) out.push("books_25");
   if (stats.streak >= 3) out.push("streak_3");
   if (stats.streak >= 7) out.push("streak_7");
   if (stats.streak >= 30) out.push("streak_30");
