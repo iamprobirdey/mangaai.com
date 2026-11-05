@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Deploy the latest main to the droplet, with no downtime and an instant rollback.
+# Deploy the latest main to the droplet. The build runs beside the live site, so only the final
+# switch restarts the app (about 2 seconds). Failed builds never touch the live site.
 #
 #   /srv/mangaai/repo                git clone of the project (fetched, never served)
 #   /srv/mangaai/releases/<stamp>    one folder per deploy, built in place

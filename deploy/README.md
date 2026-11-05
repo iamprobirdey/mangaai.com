@@ -18,9 +18,10 @@ Folder layout on the droplet:
 | `/srv/mangaai/shared/.env.production` | the secrets, linked into every release |
 | `/srv/mangaai/logs` | app and cron logs |
 
-`deploy/update.sh` builds a new release next to the live one and only switches over once the
-build succeeds and `/api/health` answers, so a broken build never takes the site down. It rolls
-back by itself if the new release fails its health check.
+`deploy/update.sh` builds a new release next to the live one while the site keeps serving, then
+switches over (a ~2-second app restart) once the build succeeds, and checks `/api/health`. A
+broken build never touches the live site, and it rolls back by itself if the new release fails
+its health check.
 
 ---
 
